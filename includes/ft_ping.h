@@ -22,10 +22,11 @@
 #include <netinet/ip_icmp.h>
 
 #include "../libraries/libft.h"
-#define CPT_FLAGS 2
+#define MAX_INT 2147483647
 #define PACKET_SIZE 84
 #define ICMP_PAYLOAD_SIZE 56
 #define MAX_PACKET_SIZE 255
+#define ONE_SEC 1000000
 
 typedef struct		s_packetData {
 	struct iphdr	ipHeader;						//size 20
@@ -34,16 +35,20 @@ typedef struct		s_packetData {
 }					t_packetData;						// total is 84
 
 typedef struct 	s_pingData {
-	bool					options[CPT_FLAGS];
+	char					options; // bits are 1 if acceptedFlag[bit_pos] est dans input
 	char					*strIp;
 	struct sockaddr_in		*networkIp;
 	int						pingNb;
 	t_packetData			packet;
+	int						max_ping;
 }							t_pingData;
 
-
+extern char		acceptedFlags[];
 t_pingData		parsing(int ac, char **args);
-void			create_and_send_packet(t_pingData *data);
+int				create_packet(t_pingData *data);
+void			send_packet(t_pingData *data, int sockFd);
+char*			recieve_packet(t_pingData *data, int sockFd);
+void			print_output(t_pingData *data, char *packet);
 
 
 #endif

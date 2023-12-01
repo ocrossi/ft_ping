@@ -1,5 +1,7 @@
 #include "../includes/ft_ping.h"
+#include <asm-generic/socket.h>
 #include <bits/types/struct_iovec.h>
+#include <bits/types/struct_timeval.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
@@ -45,10 +47,7 @@ void construct_headers(t_packetData *packet, t_pingData *data) {
 	icmpHdr->un.echo.sequence = data->pingNb;
 	icmpHdr->checksum = 0;
 
-
 	size_t size_pack = sizeof(packet->payload) + sizeof(struct icmphdr);
-	printf("sizeof obj to  checksum = %lu\n", size_pack);
-
 	icmpHdr->checksum = checksum(&(packet->icmpHeader), size_pack);
 }
 
@@ -65,6 +64,11 @@ int create_socket(t_pingData *data) {
 	int sockFd;
 	int protocol = IPPROTO_ICMP;
 
+	struct timeval tval;
+	ft_memset(&tval, 0, sizeof(tval));
+	tval.tv_sec = 10;
+	tval.tv_usec = 0;
+
 	sockFd = socket(AF_INET, SOCK_RAW, protocol);
 	// !! needs sudo privileges to create raw socket
 	if (sockFd < 0) {
@@ -74,17 +78,17 @@ int create_socket(t_pingData *data) {
 	protocol = IPPROTO_IP;
 	int optval = 1;
 	setsockopt(sockFd, protocol, IP_HDRINCL, (int[1]){1}, sizeof(int));
+	setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tval, sizeof(tval));
 	
 	// char *packetInstance = (char *)malloc(sizeof(t_packetData));
 	// ft_memcpy(packetInstance, (void *)data->packet, sizeof(data->packet));
+	// printf("size of my packet = %lu\n", sizeof(data->packet));
 	
-	printf("size of my packet = %lu\n", sizeof(data->packet));
-
 	return sockFd;
 }
 
 void send_packet(t_pingData *data, int sockFd) {
-	printf("size packet envoye %lu\n", sizeof(data->packet));
+	/* printf("size packet envoye %lu\n", sizeof(data->packet)); */
 
 	int bytesSent = sendto(sockFd, &data->packet, sizeof(data->packet),
 		    0, (struct sockaddr *)data->networkIp, sizeof(struct sockaddr_in));
@@ -94,7 +98,7 @@ void send_packet(t_pingData *data, int sockFd) {
 	}
 }
 
-void recieve_message(t_pingData *data, int sockFd) {
+char* recieve_packet(t_pingData *data, int sockFd) {
 	char recieve[PACKET_SIZE];
 	struct iovec retMsgData;
 	struct msghdr retMsg;
@@ -107,24 +111,24 @@ void recieve_message(t_pingData *data, int sockFd) {
 	retMsgData.iov_len = PACKET_SIZE;
 
 	retMsg.msg_iov = &retMsgData;
-	retMsg.msg_namelen = 1;
+	retMsg.msg_iovlen = 1;
 
 	ssize_t bytesRecieved = recvmsg(sockFd, &retMsg, 0);
 	if (bytesRecieved < 0) {
 		printf("this was at this moment jackson junior knew... he fucked up\n");
 		perror("bytes not sent");
 	}
-	printf("bytes recieved =  %lu \n", bytesRecieved);
-	
-	// print_memory(&recieve, , 16);
-
+	// printf("bytes recieved =  %lu \n", bytesRecieved);
+	// 
+	// print_memory(&recieve, PACKET_SIZE, 16);
+	return strdup(recieve);
 }
 
-void create_and_send_packet(t_pingData *data) {
-	// data->pingNb++; // might be the only thing to change when sending multiple packets
+int create_packet(t_pingData *data) {
+	int sockFd;
 
 	construct_packet(data);
-	int sockFd = create_socket(data);
-	send_packet(data, sockFd);
-	recieve_message(data, sockFd);
+	sockFd = create_socket(data);
+
+	return sockFd;
 }
