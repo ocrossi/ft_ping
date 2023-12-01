@@ -1,8 +1,6 @@
 #ifndef FT_PING_H
 # define FT_PING_H
 
-// #define _GNU_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>

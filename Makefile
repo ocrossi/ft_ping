@@ -31,24 +31,25 @@ all: libft $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) -L $(LIB_PATH) -I $(INC_PATH) $^ -o $@ $(LIB_PATH)/$(NAME_LIB)
+	@sudo setcap cap_net_raw=pe $(NAME)
 	# removing cflags coz boring in dev, to add at the end 
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c $(HEADERS)
-	mkdir $(OBJ_PATH) 2> /dev/null || true
-	$(CC) -L $(LIB_PATH) -I $(INC_PATH) -c $< -o $@ 
+	@mkdir $(OBJ_PATH) 2> /dev/null || true
+	@$(CC) -L $(LIB_PATH) -I $(INC_PATH) -c $< -o $@ 
 	# removing cflags coz boring in dev, to add at the end
 
 libft:
-	make -C $(LIB_PATH)
+	@make -C $(LIB_PATH)
 
 
 clean:
-	rm -f $(OBJS)
-	make -C $(LIB_PATH) clean
-	rmdir $(OBJ_PATH) 2> /dev/null || true
+	@rm -f $(OBJS)
+	@make -C $(LIB_PATH) clean
+	@rmdir $(OBJ_PATH) 2> /dev/null || true
 
 fclean: clean
-	make -C $(LIB_PATH) fclean
-	rm -f $(NAME)
+	@make -C $(LIB_PATH) fclean
+	@rm -f $(NAME)
 
 re: fclean all
