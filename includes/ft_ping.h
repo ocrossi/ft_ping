@@ -23,12 +23,9 @@
 
 #include "../libraries/libft.h"
 #define CPT_FLAGS 2
-// #define SOCK_PORT 4242
-
+#define PACKET_SIZE 84
 #define ICMP_PAYLOAD_SIZE 56
 #define MAX_PACKET_SIZE 255
-
-
 
 typedef struct		s_packetData {
 	struct iphdr	ipHeader;						//size 20
