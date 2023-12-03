@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <time.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
@@ -41,10 +42,27 @@ typedef struct 	s_pingData {
 	int						pingNb;
 	t_packetData			packet;
 	int						max_ping;
+	int						ttl;
+	int						timeout;
 }							t_pingData;
 
+
+typedef struct 	s_statData {
+	char					*nameDestination;
+	int						transmitted;
+	int						recieved;
+	int						lost;
+	time_t					time;
+	time_t					min;
+	time_t					average;
+	time_t					max;
+	time_t					mdev;
+}							t_statData;
+
+
+
 extern char		acceptedFlags[];
-t_pingData		parsing(int ac, char **args);
+t_pingData		parsing(int ac, t_statData *stats, char **args);
 int				create_packet(t_pingData *data);
 void			send_packet(t_pingData *data, int sockFd);
 char*			recieve_packet(t_pingData *data, int sockFd);

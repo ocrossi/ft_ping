@@ -35,7 +35,7 @@ void construct_headers(t_packetData *packet, t_pingData *data) {
 	ipHdr->tot_len = htons(86);
 	ipHdr->id = 0;
 	ipHdr->frag_off = htons(0);
-	ipHdr->ttl = IPDEFTTL; // can inc to MAXTTL
+	ipHdr->ttl = (data->ttl != 0) ? data->ttl : IPDEFTTL;
 	ipHdr->protocol = IPPROTO_ICMP;
 	ipHdr->check = 0;
 	ipHdr->saddr = INADDR_ANY;
