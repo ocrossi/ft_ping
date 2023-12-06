@@ -115,10 +115,11 @@ char* recieve_packet(t_pingData *data, int sockFd) {
 
 	ssize_t bytesRecieved = recvmsg(sockFd, &retMsg, 0);
 	if (bytesRecieved < 0) {
-		printf("this was at this moment jackson junior knew... he fucked up\n");
+		// printf("this was at this moment jackson junior knew... he fucked up\n");
 		perror("bytes not sent");
 	}
-	// printf("bytes recieved =  %lu \n", bytesRecieved);
+	printf("bytes recieved =  %lu \n", bytesRecieved);
+	print_memory(&retMsg, bytesRecieved, 16);
 	// 
 	// print_memory(&recieve, PACKET_SIZE, 16);
 	return strdup(recieve);

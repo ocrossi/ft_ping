@@ -140,7 +140,6 @@ int manage_options(int ac, char **args, t_pingData *data) {
 		fprintf(stderr, "ping: no destination, exiting ...\n\n");
 		print_usage(0);
 	}
-	printf("destination = %s\n", args[index_destination]);
 	return index_destination;
 }
 
@@ -162,22 +161,23 @@ void manage_destination(char *arg, t_pingData *data) {
 	}
 	h = (struct sockaddr_in *)res->ai_addr;
 	inet_ntop(AF_INET, &h->sin_addr, buff, INET_ADDRSTRLEN);
+	
+	printf("%d\n", h->sin_addr.s_addr);
 	data->strIp = strdup(buff);
 	data->networkIp = h;
 }
 
-t_pingData parsing(int ac, t_statData *stats, char **args) {
+void parsing(int ac, char **args, t_pingData *data) {
 	char flag = 0;
-	t_pingData data;
 	int index_dest;
 	
-	ft_memset(&data, 0, sizeof(data));
+	ft_memset(data, 0, sizeof(*data));
 	if (ac < 2) {
 		fprintf(stderr, "ping: usage error: Destination address required\n");
 		exit(0);
 	}
-	index_dest = manage_options(ac, args, &data);
-	manage_destination(args[index_dest], &data);
-	stats->nameDestination = args[index_dest];
-	return data;
+	index_dest = manage_options(ac, args, data);
+	manage_destination(args[index_dest], data);
+	stats.nameDestination = ft_strdup(args[index_dest]);
+	// printf("destination = %s\n", stats.nameDestination);
 }

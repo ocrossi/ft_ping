@@ -8,8 +8,8 @@ void print_output(t_pingData *data, char *packet) {
 	char *time = "time";
 
 	if (data->pingNb == 1) {
-		printf("PING %s (%s) %d(%d) bytes of data\n", data->strIp, data->strIp,
+		printf("PING %s (%s) %d(%d) bytes of data\n", stats.nameDestination, data->strIp,
 		 ICMP_PAYLOAD_SIZE, PACKET_SIZE);
 	}
-	printf("64 bytes from %s (%s): icmp_seq=%d ttl=%d time=%s\n", data->strIp, data->strIp, data->pingNb, ttl, time);
+	printf("64 bytes from %s (%s): icmp_seq=%d ttl=%d time=%s\n", data->reverseDns, data->strIp, data->pingNb, ttl, time);
 }

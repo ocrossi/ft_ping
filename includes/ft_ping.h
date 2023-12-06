@@ -39,6 +39,7 @@ typedef struct 	s_pingData {
 	char					options; // bits are 1 if acceptedFlag[bit_pos] est dans input
 	char					*strIp;
 	struct sockaddr_in		*networkIp;
+	char					*reverseDns;
 	int						pingNb;
 	t_packetData			packet;
 	int						max_ping;
@@ -61,8 +62,10 @@ typedef struct 	s_statData {
 
 
 
-extern char		acceptedFlags[];
-t_pingData		parsing(int ac, t_statData *stats, char **args);
+extern char						acceptedFlags[];
+extern t_statData				stats;
+
+void			parsing(int ac, char **args, t_pingData *data);
 int				create_packet(t_pingData *data);
 void			send_packet(t_pingData *data, int sockFd);
 char*			recieve_packet(t_pingData *data, int sockFd);
