@@ -29,6 +29,8 @@
 #define MAX_PACKET_SIZE 255
 #define ONE_SEC 1000000
 
+typedef struct timeval		t_val;
+
 typedef struct		s_packetData {
 	struct iphdr	ipHeader;						//size 20
 	struct icmphdr	icmpHeader;						// size 8
@@ -41,10 +43,14 @@ typedef struct 	s_pingData {
 	struct sockaddr_in		*networkIp;
 	char					*reverseDns;
 	int						pingNb;
-	t_packetData			packet;
+	t_packetData			*spacket;
 	int						max_ping;
 	int						ttl;
 	int						timeout;
+	t_packetData			*rpacket;
+	t_val					sendTime;
+	t_val					recieveTime;
+	double					time;
 }							t_pingData;
 
 
@@ -53,11 +59,12 @@ typedef struct 	s_statData {
 	int						transmitted;
 	int						recieved;
 	int						lost;
-	time_t					time;
-	time_t					min;
-	time_t					average;
-	time_t					max;
-	time_t					mdev;
+	double					time;
+	double					min;
+	double					average;
+	double					max;
+	double					mdev;
+	int						nbErrs;
 }							t_statData;
 
 
@@ -66,10 +73,11 @@ extern char						acceptedFlags[];
 extern t_statData				stats;
 
 void			parsing(int ac, char **args, t_pingData *data);
-int				create_packet(t_pingData *data);
+int				create_socket(t_pingData *data);
+void			construct_packet(t_pingData *data);
 void			send_packet(t_pingData *data, int sockFd);
 char*			recieve_packet(t_pingData *data, int sockFd);
-void			print_output(t_pingData *data, char *packet);
+void			print_output(t_pingData *data);
 
 
 #endif

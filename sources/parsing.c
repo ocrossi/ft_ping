@@ -10,7 +10,7 @@ void print_usage(char invalidFlag) {
 	printf("Usage\n\tping [options] <destination>\n\nOptions:\n");
 	printf("\t<destination>\t\t  dns name or ip address\n\n");
 	printf("-v % 30s verbose output\n", "");
-	printf("-c <count> % 22s stop after <count> replies\n", "");
+	printf("-c <count> % 22s stop spacket <count> replies\n", "");
 	printf("-t <count> % 22s set ttl value to <count>\n", "");
 	printf("-? % 30s Print usage\n", "");
 	exit(1);
@@ -162,7 +162,7 @@ void manage_destination(char *arg, t_pingData *data) {
 	h = (struct sockaddr_in *)res->ai_addr;
 	inet_ntop(AF_INET, &h->sin_addr, buff, INET_ADDRSTRLEN);
 	
-	printf("%d\n", h->sin_addr.s_addr);
+	// printf("%d\n", h->sin_addr.s_addr);
 	data->strIp = strdup(buff);
 	data->networkIp = h;
 }

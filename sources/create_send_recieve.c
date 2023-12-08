@@ -1,13 +1,4 @@
 #include "../includes/ft_ping.h"
-#include <asm-generic/socket.h>
-#include <bits/types/struct_iovec.h>
-#include <bits/types/struct_timeval.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
 
 unsigned short checksum(void *b, int len)
 {
@@ -53,11 +44,11 @@ void construct_headers(t_packetData *packet, t_pingData *data) {
 
 
 void construct_packet(t_pingData *data) {
-	t_packetData packet;
+	t_packetData *packet = (t_packetData *)malloc(sizeof(t_packetData));
 
-	strcpy(packet.payload, "patato|potato");
-	construct_headers(&packet, data);
-	data->packet = packet;
+	strcpy(packet->payload, "patato|potato");
+	construct_headers(packet, data);
+	data->spacket = packet;
 }
 
 int create_socket(t_pingData *data) {
@@ -79,23 +70,22 @@ int create_socket(t_pingData *data) {
 	int optval = 1;
 	setsockopt(sockFd, protocol, IP_HDRINCL, (int[1]){1}, sizeof(int));
 	setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tval, sizeof(tval));
-	
-	// char *packetInstance = (char *)malloc(sizeof(t_packetData));
-	// ft_memcpy(packetInstance, (void *)data->packet, sizeof(data->packet));
-	// printf("size of my packet = %lu\n", sizeof(data->packet));
-	
+
 	return sockFd;
 }
 
 void send_packet(t_pingData *data, int sockFd) {
 	/* printf("size packet envoye %lu\n", sizeof(data->packet)); */
+	
+	gettimeofday(&data->sendTime, NULL);
 
-	int bytesSent = sendto(sockFd, &data->packet, sizeof(data->packet),
+	int bytesSent = sendto(sockFd, data->spacket, sizeof(t_packetData),
 		    0, (struct sockaddr *)data->networkIp, sizeof(struct sockaddr_in));
 	if (bytesSent < 0) {
 		printf("this was at this moment jackson knew... he fucked up\n");
 		perror("bytes not sent");
 	}
+	// printf("bytes recieved =  %d \n", bytesSent);
 }
 
 char* recieve_packet(t_pingData *data, int sockFd) {
@@ -115,21 +105,11 @@ char* recieve_packet(t_pingData *data, int sockFd) {
 
 	ssize_t bytesRecieved = recvmsg(sockFd, &retMsg, 0);
 	if (bytesRecieved < 0) {
-		// printf("this was at this moment jackson junior knew... he fucked up\n");
 		perror("bytes not sent");
 	}
-	printf("bytes recieved =  %lu \n", bytesRecieved);
-	print_memory(&retMsg, bytesRecieved, 16);
-	// 
-	// print_memory(&recieve, PACKET_SIZE, 16);
+	data->rpacket = (t_packetData *)malloc(sizeof(t_packetData));
+	ft_memcpy(data->rpacket, recieve, PACKET_SIZE);
+	gettimeofday(&data->recieveTime, NULL);
+
 	return strdup(recieve);
-}
-
-int create_packet(t_pingData *data) {
-	int sockFd;
-
-	construct_packet(data);
-	sockFd = create_socket(data);
-
-	return sockFd;
 }
