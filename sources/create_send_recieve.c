@@ -1,4 +1,5 @@
 #include "../includes/ft_ping.h"
+#include <unistd.h>
 
 unsigned short checksum(void *b, int len)
 {
@@ -35,7 +36,7 @@ void construct_headers(t_packetData *packet, t_pingData *data) {
 	icmpHdr->type = ICMP_ECHO;
 	icmpHdr->code = 0;
 	icmpHdr->un.echo.id = getpid();
-	icmpHdr->un.echo.sequence = data->pingNb;
+	icmpHdr->un.echo.sequence = stats.pingNb;
 	icmpHdr->checksum = 0;
 
 	size_t size_pack = sizeof(packet->payload) + sizeof(struct icmphdr);
@@ -85,10 +86,11 @@ void send_packet(t_pingData *data, int sockFd) {
 		printf("this was at this moment jackson knew... he fucked up\n");
 		perror("bytes not sent");
 	}
+	stats.transmitted++;
 	// printf("bytes recieved =  %d \n", bytesSent);
 }
 
-char* recieve_packet(t_pingData *data, int sockFd) {
+void recieve_packet(t_pingData *data, int sockFd) {
 	char recieve[PACKET_SIZE];
 	struct iovec retMsgData;
 	struct msghdr retMsg;
@@ -110,6 +112,5 @@ char* recieve_packet(t_pingData *data, int sockFd) {
 	data->rpacket = (t_packetData *)malloc(sizeof(t_packetData));
 	ft_memcpy(data->rpacket, recieve, PACKET_SIZE);
 	gettimeofday(&data->recieveTime, NULL);
-
-	return strdup(recieve);
+	stats.recieved++;
 }

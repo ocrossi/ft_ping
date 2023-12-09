@@ -25,6 +25,7 @@
 #include "../libraries/libft.h"
 #define MAX_INT 2147483647
 #define PACKET_SIZE 84
+#define MAX_ARR_MEDIAN 10000
 #define ICMP_PAYLOAD_SIZE 56
 #define MAX_PACKET_SIZE 255
 #define ONE_SEC 1000000
@@ -42,7 +43,6 @@ typedef struct 	s_pingData {
 	char					*strIp;
 	struct sockaddr_in		*networkIp;
 	char					*reverseDns;
-	int						pingNb;
 	t_packetData			*spacket;
 	int						max_ping;
 	int						ttl;
@@ -50,21 +50,26 @@ typedef struct 	s_pingData {
 	t_packetData			*rpacket;
 	t_val					sendTime;
 	t_val					recieveTime;
+	t_val					start_time;
 	double					time;
 }							t_pingData;
 
 
 typedef struct 	s_statData {
+	t_pingData				*data;
 	char					*nameDestination;
 	int						transmitted;
 	int						recieved;
 	int						lost;
+	int						pingNb;
 	double					time;
 	double					min;
 	double					average;
+	double					median;
 	double					max;
 	double					mdev;
 	int						nbErrs;
+	double					*median_arr;
 }							t_statData;
 
 
@@ -76,7 +81,7 @@ void			parsing(int ac, char **args, t_pingData *data);
 int				create_socket(t_pingData *data);
 void			construct_packet(t_pingData *data);
 void			send_packet(t_pingData *data, int sockFd);
-char*			recieve_packet(t_pingData *data, int sockFd);
+void			recieve_packet(t_pingData *data, int sockFd);
 void			print_output(t_pingData *data);
 
 
