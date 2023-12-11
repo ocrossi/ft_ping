@@ -4,18 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void print_usage(char invalidFlag) {
-	if (invalidFlag != 0)
-		fprintf(stderr, "ping: invalid option -- '%c'\n\n", invalidFlag);
-	printf("Usage\n\tping [options] <destination>\n\nOptions:\n");
-	printf("\t<destination>\t\t  dns name or ip address\n\n");
-	printf("-v % 30s verbose output\n", "");
-	printf("-c <count> % 22s stop spacket <count> replies\n", "");
-	printf("-t <count> % 22s set ttl value to <count>\n", "");
-	printf("-? % 30s Print usage\n", "");
-	exit(1);
-}
-
 int isNum(char *arg) {
 	for (int i = 0; i < ft_strlen(arg); i++) {
 		if (arg[i] < '0' || arg[i] > '9')
@@ -58,8 +46,6 @@ int check_managed_flags(char *arg, t_pingData *data) {
 				return i;
 		}
 	}
-	// printf("end of checkManagedFlags print me options\n");
-	// print_memory(&(data->options), 1, 2);
 	if (ret == false)
 		return -1;
 	return 0;
@@ -73,13 +59,11 @@ int manage_options(int ac, char **args, t_pingData *data) {
 
 	for (int i = 1; i < ac; i++) {
 		isDestination = true;
-		// printf("arg tested = %s\n", args[i]);
 		if (args[i][0] == '-') {
 			if (ft_strlen(args[i]) == 1) {
 				print_usage(0);
 			}
 			if ((indexBadFlag = check_managed_flags(args[i], data)) != 0) {
-				// printf("wait index %d\n", indexBadFlag);
 				print_usage(args[i][indexBadFlag]);
 			}
 			isDestination = false;
@@ -96,7 +80,6 @@ int manage_options(int ac, char **args, t_pingData *data) {
 			data->options ^= 4; //deactivate c to enter only once
 			i++;
 			isDestination = false;
-			// printf("max_ping = %d\n", data->max_ping);
 		}
 		if (data->options & 8) { //check if t is lit
 			if (i == ac - 1) {
@@ -110,10 +93,8 @@ int manage_options(int ac, char **args, t_pingData *data) {
 			data->options ^= 8; //deactivate t to enter only once
 			i++;
 			isDestination = false;
-			// printf("ttl = %d\n", data->ttl);
 		}
 		if (data->options & 16) { //check if W is lit
-			// printf("W lit\n");
 			if (i == ac - 1) {
 				print_usage(0);
 			}
@@ -125,12 +106,10 @@ int manage_options(int ac, char **args, t_pingData *data) {
 			data->options ^= 16; //deactivate W to enter only once
 			i++;
 			isDestination = false;
-			// printf("timeout = %d\n", data->timeout);
 		}
 		if (isDestination == true) {
 			index_destination = i;
 			destCount++;
-/* 			printf("whes %s\n", args[i]); */
 		}
 	}
 	if (destCount > 1) {
@@ -161,9 +140,7 @@ void manage_destination(char *arg, t_pingData *data) {
 	}
 	h = (struct sockaddr_in *)res->ai_addr;
 	inet_ntop(AF_INET, &h->sin_addr, buff, INET_ADDRSTRLEN);
-	
-	// printf("%d\n", h->sin_addr.s_addr);
-	data->strIp = strdup(buff);
+	data->strIp = ft_strdup(buff);
 	data->networkIp = h;
 }
 
@@ -178,6 +155,5 @@ void parsing(int ac, char **args, t_pingData *data) {
 	}
 	index_dest = manage_options(ac, args, data);
 	manage_destination(args[index_dest], data);
-	stats.nameDestination = ft_strdup(args[index_dest]);
-	// printf("destination = %s\n", stats.nameDestination);
+	stats.nameDestination = args[index_dest];
 }

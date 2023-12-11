@@ -6,12 +6,25 @@ https://datatracker.ietf.org/doc/html/rfc791
 ip protocol doc, search for "3.1.  Internet Header Format"
 
 ## TODO
-frees
-stats compute & display
+# stats compute & display
 # reverse DNS
-return values for ping, 0 works, 1 si aucun paquet recu | (c|w activated) & paquet recu < c, autree erreur c 2
+# raj le -q pour quiet
+# check output si ttl est trop petit pr dest
 timeout
-check output si ttl est trop petit pr dest
 
-trouver un dernier bonus
-raj le -q pour quiet
+
+
+frees
+
+parsing:
+    data->strIp
+
+create_send_recieve:
+   data->spacket
+   data->rpacket
+
+<!-- main: -->
+<!--     median_arr -->
+<!---->
+<!-- utils: -->
+<!--    data->reverseDNS  -->

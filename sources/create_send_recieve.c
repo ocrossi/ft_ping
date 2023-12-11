@@ -76,21 +76,17 @@ int create_socket(t_pingData *data) {
 }
 
 void send_packet(t_pingData *data, int sockFd) {
-	/* printf("size packet envoye %lu\n", sizeof(data->packet)); */
-	
 	gettimeofday(&data->sendTime, NULL);
 
 	int bytesSent = sendto(sockFd, data->spacket, sizeof(t_packetData),
 		    0, (struct sockaddr *)data->networkIp, sizeof(struct sockaddr_in));
 	if (bytesSent < 0) {
-		printf("this was at this moment jackson knew... he fucked up\n");
 		perror("bytes not sent");
 	}
 	stats.transmitted++;
-	// printf("bytes recieved =  %d \n", bytesSent);
 }
 
-void recieve_packet(t_pingData *data, int sockFd) {
+bool recieve_packet(t_pingData *data, int sockFd) {
 	char recieve[PACKET_SIZE];
 	struct iovec retMsgData;
 	struct msghdr retMsg;
@@ -107,10 +103,10 @@ void recieve_packet(t_pingData *data, int sockFd) {
 
 	ssize_t bytesRecieved = recvmsg(sockFd, &retMsg, 0);
 	if (bytesRecieved < 0) {
-		perror("bytes not sent");
+		return false;
 	}
 	data->rpacket = (t_packetData *)malloc(sizeof(t_packetData));
 	ft_memcpy(data->rpacket, recieve, PACKET_SIZE);
 	gettimeofday(&data->recieveTime, NULL);
-	stats.recieved++;
+	return true;
 }

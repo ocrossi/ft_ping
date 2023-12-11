@@ -10,7 +10,6 @@
 #include <stdbool.h>
 #include <errno.h>
 
-
 #include <netdb.h>
 
 #include <sys/time.h>
@@ -29,6 +28,21 @@
 #define ICMP_PAYLOAD_SIZE 56
 #define MAX_PACKET_SIZE 255
 #define ONE_SEC 1000000
+
+// errors //
+#define EICMP_DEST_UNREACH		"Destination Unreachable\n"
+#define EICMP_SOURCE_QUENCH		"Source Quench\n"
+#define EICMP_REDIRECT			"Redirect (change route)\n"
+#define EICMP_TIME_EXCEEDED		"Time Exceeded\n"
+#define EICMP_PARAMETERPROB		"Parameter Problem\n"
+#define EICMP_TIMESTAMP			"Timestamp Request"
+#define EICMP_TIMESTAMPREPLY	"Timestamp Reply\n"
+#define EICMP_INFO_REQUEST		"Information Request\n"
+#define EICMP_INFO_REPLY		"Information Reply\n"
+#define EICMP_ADDRESS			"Address Mask Request\n"
+#define EICMP_ADDRESSREPLY		"Address Mask Reply\n"
+
+#define	UNKNOWN_ERR_CODE		"Unknown error code\n" 
 
 typedef struct timeval		t_val;
 
@@ -52,6 +66,7 @@ typedef struct 	s_pingData {
 	t_val					recieveTime;
 	t_val					start_time;
 	double					time;
+	char					*error;
 }							t_pingData;
 
 
@@ -81,8 +96,16 @@ void			parsing(int ac, char **args, t_pingData *data);
 int				create_socket(t_pingData *data);
 void			construct_packet(t_pingData *data);
 void			send_packet(t_pingData *data, int sockFd);
-void			recieve_packet(t_pingData *data, int sockFd);
-void			print_output(t_pingData *data);
-
+bool			recieve_packet(t_pingData *data, int sockFd);
+void			print_output_loop(t_pingData *data, bool recieved);
+void			print_usage(char invalidFlag);
+void			print_stats(int signum);
+void			reverseDNS(t_pingData *data);
+void			set_median_arr(void);
+double			find_average(void);
+double			find_stddev(void);
+double			convert_to_milliseconds(t_val time, t_val base);
+bool			check_packet_data(t_pingData *data);
+void			manage_time(t_pingData *data);
 
 #endif
