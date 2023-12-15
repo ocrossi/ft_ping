@@ -1,4 +1,7 @@
 #include "../includes/ft_ping.h"
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <netinet/ip.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,14 +15,39 @@ int isNum(char *arg) {
 	return 1;
 }
 
-int check_number_next_arg(char *flag, char *arg) {
+int isFloatNum(char *arg) {
+	bool dot = false;
+	for (int i = 0; i < ft_strlen(arg); i++) {
+		if (arg[i] == '.') {
+			dot = true;
+			continue;
+		}
+		if (arg[i] < '0' || arg[i] > '9')
+			return -1;
+	}
+	return 1;
+}
+
+int check_number_next_arg_int(char *flag, char *arg) {
 	int c_res = -1;
 	if (arg == NULL || ft_strlen(arg) == 0 || isNum(arg) == -1) {
-		fprintf(stderr, "%s flag requires a signed number\n", flag);
+		fprintf(stderr, "%s flag requires an unsigned number\n", flag);
 		print_usage(0);
 		return -1;
 	} else {
 		c_res = ft_atoi(arg);
+	}
+	return c_res;
+}
+
+double check_number_next_arg_float(char *flag, char *arg) {
+	double c_res = -1;
+	if (arg == NULL || ft_strlen(arg) == 0 || isFloatNum(arg) == -1) {
+		fprintf(stderr, "%s flag requires a floating unsigned number\n", flag);
+		print_usage(0);
+		return -1;
+	} else {
+		c_res = ft_atolf(arg);
 	}
 	return c_res;
 }
@@ -39,7 +67,7 @@ int check_managed_flags(char *arg, t_pingData *data) {
 			if (c == acceptedFlags[j]) {
 				data->options += 1 << j;
 				ret = true;
-				if (c == 'c' || c == 't' || c == 'W')
+				if (c == 'c' || c == 't' || c == 'i')
 					incomp++;
 			}
 			if (incomp > 1)
@@ -72,10 +100,11 @@ int manage_options(int ac, char **args, t_pingData *data) {
 			if (i == ac - 1) {
 				print_usage(0);
 			}
-			data->max_ping = check_number_next_arg(args[i], args[i + 1]);
+			data->max_ping = check_number_next_arg_int(args[i], args[i + 1]);
 			if (data->max_ping <= 0 || data->max_ping >= MAX_INT) {
 				printf("ping: invalid argument: '%d': out of range: 1 <= value <= %d\n", 
 							data->max_ping, MAX_INT);
+				exit(1);
 			}
 			data->options ^= 4; //deactivate c to enter only once
 			i++;
@@ -85,25 +114,28 @@ int manage_options(int ac, char **args, t_pingData *data) {
 			if (i == ac - 1) {
 				print_usage(0);
 			}
-			data->ttl = check_number_next_arg(args[i], args[i + 1]);
+			data->ttl = check_number_next_arg_int(args[i], args[i + 1]);
 			if (data->ttl <= 0 || data->ttl >= MAXTTL) {
 				printf("ping: invalid argument: '%d': out of range: 1 <= value <= %d\n", 
 							data->ttl, MAXTTL);
+				exit(1);
 			}
 			data->options ^= 8; //deactivate t to enter only once
 			i++;
 			isDestination = false;
 		}
-		if (data->options & 16) { //check if W is lit
+		if (data->options & 16) { //check if i is lit
 			if (i == ac - 1) {
 				print_usage(0);
 			}
-			data->timeout = check_number_next_arg(args[i], args[i + 1]);
-			if (data->timeout <= 0 || data->timeout >= MAX_INT) {
-				printf("ping: invalid argument: '%d': out of range: 1 <= value <= %d\n", 
-							data->timeout, MAX_INT);
+			double res = check_number_next_arg_float(args[i], args[i + 1]);
+			data->interval = convert_to_microseconds(res);
+			if (data->interval <= 0 || data->interval >= MAX_INT) {
+				printf("ping: invalid argument: '%u': out of range: 0 < value <= %d\n", 
+							data->interval, MAX_INT);
+				exit(1);
 			}
-			data->options ^= 16; //deactivate W to enter only once
+			data->options ^= 16; //deactivate i to enter only once
 			i++;
 			isDestination = false;
 		}
@@ -135,19 +167,39 @@ void manage_destination(char *arg, t_pingData *data) {
 	hints.ai_flags = 0;
 
 	if ((ret = getaddrinfo(arg, NULL, &hints, &res)) != 0) {
-		fprintf(stderr, "getaddrinfo crashed with %s\n", gai_strerror(ret));
+		fprintf(stderr, "ping: %s: %s\n", arg,gai_strerror(ret));
 		exit(1);
 	}
 	h = (struct sockaddr_in *)res->ai_addr;
 	inet_ntop(AF_INET, &h->sin_addr, buff, INET_ADDRSTRLEN);
 	data->strIp = ft_strdup(buff);
-	data->networkIp = h;
+	data->networkIp  = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+	ft_memcpy(data->networkIp, h, sizeof(struct sockaddr_in));
+	freeaddrinfo(res);
+}
+
+bool checkIsDomainName(char *in) {
+	struct hostent bufs,*host;
+	char buff[256];
+	int r;
+	int h_errno;
+
+	r = gethostbyname_r(in, &bufs, buff, sizeof(buff), &host, &h_errno);
+
+	if (r == 0) {
+		char *ip = inet_ntoa(*(struct in_addr *)host->h_addr_list[0]);
+		if (ft_strcmp(ip, in) == 0) {
+			return false;
+		}
+		return true;
+	}
+	return false;
 }
 
 void parsing(int ac, char **args, t_pingData *data) {
 	char flag = 0;
 	int index_dest;
-	
+
 	ft_memset(data, 0, sizeof(*data));
 	if (ac < 2) {
 		fprintf(stderr, "ping: usage error: Destination address required\n");
@@ -156,4 +208,5 @@ void parsing(int ac, char **args, t_pingData *data) {
 	index_dest = manage_options(ac, args, data);
 	manage_destination(args[index_dest], data);
 	stats.nameDestination = args[index_dest];
+	data->isDomain =  checkIsDomainName(args[index_dest]);
 }

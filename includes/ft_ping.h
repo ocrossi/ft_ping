@@ -33,7 +33,7 @@
 #define EICMP_DEST_UNREACH		"Destination Unreachable\n"
 #define EICMP_SOURCE_QUENCH		"Source Quench\n"
 #define EICMP_REDIRECT			"Redirect (change route)\n"
-#define EICMP_TIME_EXCEEDED		"Time Exceeded\n"
+#define EICMP_TIME_EXCEEDED		"Time to live exceeded\n"
 #define EICMP_PARAMETERPROB		"Parameter Problem\n"
 #define EICMP_TIMESTAMP			"Timestamp Request"
 #define EICMP_TIMESTAMPREPLY	"Timestamp Reply\n"
@@ -60,13 +60,14 @@ typedef struct 	s_pingData {
 	t_packetData			*spacket;
 	int						max_ping;
 	int						ttl;
-	int						timeout;
+	useconds_t				interval;
 	t_packetData			*rpacket;
 	t_val					sendTime;
 	t_val					recieveTime;
 	t_val					start_time;
 	double					time;
 	char					*error;
+	bool					isDomain;
 }							t_pingData;
 
 
@@ -100,6 +101,8 @@ bool			recieve_packet(t_pingData *data, int sockFd);
 void			print_output_loop(t_pingData *data, bool recieved);
 void			print_usage(char invalidFlag);
 void			print_stats(int signum);
+void			print_head(t_pingData *data);
+void			print_flood_protection(void);
 void			reverseDNS(t_pingData *data);
 void			set_median_arr(void);
 double			find_average(void);
@@ -107,5 +110,7 @@ double			find_stddev(void);
 double			convert_to_milliseconds(t_val time, t_val base);
 bool			check_packet_data(t_pingData *data);
 void			manage_time(t_pingData *data);
+char*			get_ip_reverseDNS(t_pingData *data);
+useconds_t		convert_to_microseconds(double seconds);
 
 #endif

@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 
-char acceptedFlags[] = "v?ctWq";
+char acceptedFlags[] = "v?ctiq";
 t_statData stats;
 
 int main(int ac, char** av) {
@@ -24,8 +24,13 @@ int main(int ac, char** av) {
 	stats.data = &data;
 	set_median_arr();
 	gettimeofday(&data.start_time, NULL);
-	dprintf(1, "PING %s (%s) %d(%d) bytes of data\n\n", stats.nameDestination, data.strIp,
-			ICMP_PAYLOAD_SIZE, PACKET_SIZE);
+	print_head(&data);
+	data.interval = data.interval == 0 ? ONE_SEC : data.interval;
+	if (data.interval < 2000) {
+		free(data.networkIp);
+		free(stats.median_arr);
+		print_flood_protection();
+	}
 	while (1) {
 		recieved = false;
 		if (data.max_ping != 0 && stats.pingNb == data.max_ping) {
@@ -39,16 +44,22 @@ int main(int ac, char** av) {
 			manage_time(&data);
 			recieved = true;
 		}
-		reverseDNS(&data);
+		if (data.isDomain == true)
+			reverseDNS(&data);
+		else
+			data.reverseDns = ft_strdup(stats.nameDestination); 
 		if (!(data.options & 32)) { // if quiet is not activated
 			print_output_loop(&data, recieved);
 		}
-		if (data.reverseDns != NULL)
+		if (data.reverseDns != NULL) {
 			free(data.reverseDns);
+			data.reverseDns = NULL;
+		}
 		if (data.rpacket != NULL) {
 			free(data.rpacket);
+			data.rpacket = NULL;
 		}
-		usleep(ONE_SEC);
+		usleep(data.interval);
 	}
 	return 0;
 }

@@ -103,6 +103,7 @@ bool recieve_packet(t_pingData *data, int sockFd) {
 
 	ssize_t bytesRecieved = recvmsg(sockFd, &retMsg, 0);
 	if (bytesRecieved < 0) {
+		printf("no bytes recieved\n");
 		return false;
 	}
 	data->rpacket = (t_packetData *)malloc(sizeof(t_packetData));

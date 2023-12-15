@@ -25,43 +25,36 @@ void print_usage(char invalidFlag) {
 	printf("\t<destination>\t\t  dns name or ip address\n\n");
 	printf("-q % 30s quiet output\n", "");
 	printf("-v % 30s verbose output\n", "");
-	printf("-c <count> % 22s stop spacket <count> replies\n", "");
+	printf("-c <count> % 22s stop sending packet after <count> replies\n", "");
 	printf("-t <count> % 22s set ttl value to <count>\n", "");
+	printf("-W <count> % 22s time to wait for response\n", "");
 	printf("-? % 30s Print usage\n", "");
 	exit(1);
 }
 
-char *get_ip_reverseDNS(t_pingData *data) {
-	char buff[INET_ADDRSTRLEN];
-	int ret;
-	struct addrinfo hints;
-	struct addrinfo *res, *p;
-	struct sockaddr_in *h;
-	ft_memset(&hints, 0, sizeof(hints));
-	ft_memset(&buff, 0, sizeof(buff));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_RAW;
-	hints.ai_flags = 0;
-
-	if ((ret = getaddrinfo(data->reverseDns, NULL, &hints, &res)) != 0) {
-		fprintf(stderr, "getaddrinfo crashed with %s\n", gai_strerror(ret));
-		exit(1);
-	}
-	h = (struct sockaddr_in *)res->ai_addr;
-	inet_ntop(AF_INET, &h->sin_addr, buff, INET_ADDRSTRLEN);
-	return ft_strdup(buff);
-} 
+void print_flood_protection() {
+	dprintf(1, "ping: cannot flood; minimal interval allowed for user is 2ms\n");
+	exit(1);
+}
 
 void print_output_loop(t_pingData *data, bool recieved) {
-	int ttl = data->spacket->ipHeader.ttl;
+	int ttl = data->rpacket->ipHeader.ttl;
 	int precision = get_milisec_precision(data);
+	
+	char *ip = data->strIp;
 
 
+	int id = data->rpacket->icmpHeader.un.echo.id;
 	if (recieved == true) {
-		dprintf(1, "64 bytes from %s (%s): icmp_seq=%d ttl=%d time=%.*lf ms\n", data->reverseDns, data->strIp, stats.pingNb, ttl, precision, data->time);
+		if (data->options & 1) {
+			dprintf(1, "64 bytes from %s (%s): icmp_seq=%d ident=%d ttl=%d time=%.*lf ms\n", data->reverseDns, data->strIp, stats.pingNb, id,ttl, precision, data->time);
+		} else {
+			dprintf(1, "64 bytes from %s (%s): icmp_seq=%d ttl=%d time=%.*lf ms\n", data->reverseDns, data->strIp, stats.pingNb, ttl, precision, data->time);
+		}
 	} else {
 		char *ipReverseDNS = get_ip_reverseDNS(data);
-		dprintf(1, "From %s (%s): icmp_seq=%d %s", data->reverseDns, ipReverseDNS, stats.pingNb, data->error);
+ 		char *reverseDNS = (data->reverseDns != NULL) ? data->reverseDns : ipReverseDNS;
+		dprintf(1, "From %s (%s): icmp_seq=%d %s", reverseDNS, ipReverseDNS, stats.pingNb, data->error);
 		free(ipReverseDNS);
 	}
 }
@@ -77,7 +70,6 @@ void print_stats(int signum) {
 	if (stats.nbErrs == 0) {
 		printf("%d packets transmitted, %d received, %.*lf%% packet loss, time %.0lfms\n", stats.transmitted, stats.recieved, loss_precision,loss, time);
 	} else {
-
 		printf("%d packets transmitted, %d received, +%d errors, %.*lf%% packet loss, time %.0lfms\n", stats.transmitted, stats.recieved, stats.nbErrs, loss_precision,loss, time);
 	}
 	if (stats.nbErrs != stats.pingNb)
@@ -85,6 +77,15 @@ void print_stats(int signum) {
 	free(stats.median_arr);
 	free(stats.data->spacket);
 	free(stats.data->strIp);
+	free(stats.data->networkIp);
 	
 	exit(1);
+}
+
+void print_head(t_pingData *data) {
+	if (data->options & 1) {
+		dprintf(1, "ping: sock4.fd: 3 (socktype: SOCK_RAW), sock6.fd: 4 (socktype: SOCK_RAW), hints.ai_family: AF_UNSPEC \n\n");
+		dprintf(1, "ai->ai_family: AF_INET, ai->ai_canonname: '%s'\n", stats.nameDestination);
+	}
+	dprintf(1, "PING %s (%s) %d(%d) bytes of data\n\n", stats.nameDestination, data->strIp, ICMP_PAYLOAD_SIZE, PACKET_SIZE);
 }

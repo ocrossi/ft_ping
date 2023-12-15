@@ -1,4 +1,5 @@
 #include "../includes/ft_ping.h"
+#include <netinet/in.h>
 
 double sqrtd(double in) {
 	double groot = in / 3;
@@ -6,7 +7,7 @@ double sqrtd(double in) {
 	for (int i = 0; i < 64; i++) {
 		groot = (groot + in / groot) / 2;
 	}
-	return groot;
+	return in == 0 ? 0 : groot;
 }
 
 double find_stddev() {
@@ -45,12 +46,17 @@ void set_median_arr() {
 	}
 }
 
-
 double convert_to_milliseconds(t_val time, t_val base) {
 	double fMicro = (time.tv_usec - base.tv_usec) + (time.tv_sec - base.tv_sec) * 1000000;
 	double fMilli = fMicro / 1000;
 
 	return fMilli;
+}
+
+useconds_t convert_to_microseconds(double seconds) {
+	useconds_t res = seconds * 1000000;
+
+	return res;
 }
 
 void reverseDNS(t_pingData *data) {
@@ -62,9 +68,31 @@ void reverseDNS(t_pingData *data) {
 	temp.sin_family = AF_INET;
 	temp.sin_addr.s_addr = data->rpacket->ipHeader.saddr;
 	len = sizeof(temp);
-	if (getnameinfo((struct sockaddr*)&temp, len, buff, sizeof(buff), NULL, 0, NI_NAMEREQD)) {
-		printf("DNS error\n");
-	} else {
+
+	if (!getnameinfo((struct sockaddr*)&temp, len, buff, sizeof(buff), NULL, 0, NI_NAMEREQD)) {
 		data->reverseDns = ft_strdup(buff);
 	}
 }
+
+char *get_ip_reverseDNS(t_pingData *data) {
+	char buff[INET_ADDRSTRLEN];
+	int ret;
+	struct addrinfo hints;
+	struct addrinfo *res, *p;
+	struct sockaddr_in *h;
+	ft_memset(&hints, 0, sizeof(hints));
+	ft_memset(&buff, 0, sizeof(buff));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_RAW;
+	hints.ai_flags = 0;
+
+	if ((ret = getaddrinfo(data->reverseDns, NULL, &hints, &res)) != 0) {
+		struct in_addr ip_source;
+		ip_source.s_addr = data->rpacket->ipHeader.saddr;
+		inet_ntop(AF_INET, &ip_source, buff, INET_ADDRSTRLEN);
+	} else {
+		h = (struct sockaddr_in *)res->ai_addr;
+		inet_ntop(AF_INET, &h->sin_addr, buff, INET_ADDRSTRLEN);
+	}
+	return ft_strdup(buff);
+} 
