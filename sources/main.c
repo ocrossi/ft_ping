@@ -13,6 +13,7 @@ int main(int ac, char** av) {
 	t_pingData data;
 	int sockFd;
 	bool recieved;
+	bool error;
 
 	ft_memset(&stats, 0, sizeof(stats));
 	ft_memset(&data, 0, sizeof(data));
@@ -26,30 +27,30 @@ int main(int ac, char** av) {
 	gettimeofday(&data.start_time, NULL);
 	print_head(&data);
 	data.interval = data.interval == 0 ? ONE_SEC : data.interval;
-	if (data.interval < 2000) {
+	if (data.interval <= 20000) {
 		free(data.networkIp);
 		free(stats.median_arr);
 		print_flood_protection();
 	}
 	while (1) {
 		recieved = false;
-		if (data.max_ping != 0 && stats.pingNb == data.max_ping) {
-			print_stats(0);
-			exit(0);
-		}
+		error = false;
 		stats.pingNb++;
 		send_packet(&data, sockFd);
-		if (recieve_packet(&data, sockFd) && check_packet_data(&data)) {
-			stats.recieved++;
+		if (recieve_packet(&data, sockFd)) {
 			manage_time(&data);
 			recieved = true;
 		}
-		if (data.isDomain == true)
-			reverseDNS(&data);
-		else
-			data.reverseDns = ft_strdup(stats.nameDestination); 
-		if (!(data.options & 32)) { // if quiet is not activated
-			print_output_loop(&data, recieved);
+		if (!check_packet_data(&data)) {
+			error = true;
+			print_output_loop_error(&data);
+		} else {
+			stats.recieved++;
+		}
+		if (data.isDomain == true) reverseDNS(&data);
+		else data.reverseDns = ft_strdup(stats.nameDestination); 
+		if (!(data.options & 32) && !error) { // if quiet is not activated
+			print_output_loop(&data);
 		}
 		if (data.reverseDns != NULL) {
 			free(data.reverseDns);
@@ -58,6 +59,10 @@ int main(int ac, char** av) {
 		if (data.rpacket != NULL) {
 			free(data.rpacket);
 			data.rpacket = NULL;
+		}
+		if (data.max_ping != 0 && stats.pingNb == data.max_ping) {
+			print_stats(0);
+			exit(0);
 		}
 		usleep(data.interval);
 	}

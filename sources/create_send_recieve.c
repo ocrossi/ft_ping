@@ -58,7 +58,7 @@ int create_socket(t_pingData *data) {
 
 	struct timeval tval;
 	ft_memset(&tval, 0, sizeof(tval));
-	tval.tv_sec = 10;
+	tval.tv_sec = 1;
 	tval.tv_usec = 0;
 
 	sockFd = socket(AF_INET, SOCK_RAW, protocol);
@@ -82,8 +82,9 @@ void send_packet(t_pingData *data, int sockFd) {
 		    0, (struct sockaddr *)data->networkIp, sizeof(struct sockaddr_in));
 	if (bytesSent < 0) {
 		perror("bytes not sent");
+	} else {
+		stats.transmitted++;
 	}
-	stats.transmitted++;
 }
 
 bool recieve_packet(t_pingData *data, int sockFd) {
