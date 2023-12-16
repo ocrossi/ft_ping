@@ -1,4 +1,5 @@
 #include "../includes/ft_ping.h"
+#include <netinet/ip.h>
 #include <unistd.h>
 
 unsigned short checksum(void *b, int len)
@@ -24,9 +25,9 @@ void construct_headers(t_packetData *packet, t_pingData *data) {
 	ipHdr->ihl = 5;
 	ipHdr->version = 4;
 	ipHdr->tos = 0;
-	ipHdr->tot_len = htons(86);
-	ipHdr->id = 0;
-	ipHdr->frag_off = htons(0);
+	ipHdr->tot_len = htons(PACKET_SIZE);
+	ipHdr->id = getpid();
+	ipHdr->frag_off = htons(0x4000);
 	ipHdr->ttl = (data->ttl != 0) ? data->ttl : IPDEFTTL;
 	ipHdr->protocol = IPPROTO_ICMP;
 	ipHdr->check = 0;
@@ -88,27 +89,41 @@ void send_packet(t_pingData *data, int sockFd) {
 }
 
 bool recieve_packet(t_pingData *data, int sockFd) {
-	char recieve[PACKET_SIZE];
+	char recieve[MAX_PACKET_SIZE];
 	struct iovec retMsgData;
 	struct msghdr retMsg;
 
-	ft_memset(recieve, 0, PACKET_SIZE);
+	ft_memset(recieve, 0, MAX_PACKET_SIZE);
 	ft_memset(&retMsgData, 0, sizeof(retMsgData));
 	ft_memset(&retMsg, 0, sizeof(retMsg));
 
 	retMsgData.iov_base = &recieve;
-	retMsgData.iov_len = PACKET_SIZE;
+	retMsgData.iov_len = MAX_PACKET_SIZE;
 
 	retMsg.msg_iov = &retMsgData;
 	retMsg.msg_iovlen = 1;
 
 	ssize_t bytesRecieved = recvmsg(sockFd, &retMsg, 0);
 	if (bytesRecieved < 0) {
-		printf("no bytes recieved\n");
+		// printf("no bytes recieved\n");
 		return false;
 	}
-	data->rpacket = (t_packetData *)malloc(sizeof(t_packetData));
-	ft_memcpy(data->rpacket, recieve, PACKET_SIZE);
+	else {
+		// printf("bytes recieved %lu\n", bytesRecieved);
+		// print_memory(recieve, bytesRecieved, 16);
+
+		// for (int i = 0; i < bytesRecieved; i++) {
+		// 	if (recieve[i] == 0) {
+		// 		printf("we have a 00 byte at index %d\n", i);
+		// 	}
+		// }
+	}
+	// data->rpacket = (t_packetData *)malloc(sizeof(t_packetData));
+	//
+	data->rpacket = (t_packetData *)malloc(bytesRecieved);
+	ft_memcpy(data->rpacket, recieve, bytesRecieved);
+	data->recievedBytesArray = (char *)malloc(bytesRecieved);
+	ft_memcpy(data->recievedBytesArray, recieve, bytesRecieved);
 	gettimeofday(&data->recieveTime, NULL);
 	return true;
 }

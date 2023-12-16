@@ -88,6 +88,5 @@ void	print_memory(const void *addr, size_t size, int base)
 		print_memory_hexa(new, size);
 	else
 		write(1, "Wrong base\n", 11);
-	write(1, "\n", 1);
 	free(new);
 }

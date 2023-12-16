@@ -1,7 +1,10 @@
 #include "../includes/ft_ping.h"
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+#include <stdint.h>
 #include <stdio.h>
 
 int get_milisec_precision(t_pingData *data) {
@@ -55,20 +58,40 @@ void print_flood_protection() {
 }
 
 void print_output_loop_error(t_pingData *data) {
-	if (data->options & 1) {
-		printf("%lu size pack; do error verbose here hexdump packet\n", sizeof(*data->rpacket));
-
-		// problem packet size
-
-		return;
-	}
 	char *ip = outControlIp(data->strIp, data->isDomain);
 	char *ipReverseDNS = get_ip_reverseDNS(data);
 	char *reverseDNS = (data->reverseDns != NULL) ? data->reverseDns : ipReverseDNS;
-	unsigned long len_pack = sizeof(*(data->rpacket));
-	dprintf(1, "%lu from %s %s: icmp_seq=%d %s", len_pack, reverseDNS, ip, stats.pingNb, data->error);
+	dprintf(1, "%d from %s %s: icmp_seq=%d %s", data->retPrintSize, reverseDNS, ip, stats.pingNb, data->error);
+	if (data->options & 1) {
+		struct iphdr *ret = (t_ipHdr *)&data->recievedBytesArray[28];
+		char flag = data->recievedBytesArray[28 + 6] >> 5;
+		char srcAddr[INET_ADDRSTRLEN];	
+		char dstAddr[INET_ADDRSTRLEN];
+		struct in_addr ip;
+		printf("IP Hdr Dump:\n");
+		print_memory(&data->recievedBytesArray[28], 20, 16);
+		printf("\nVr HL TOS  Len   ID Flg   off TTL Pro  cks	Src		Dst		Data\n");
+		dprintf(1, " %hhd  %hhd  ", ret->version, ret->ihl);
+		print_memory(&data->recievedBytesArray[28 + 1] , 1, 16);
+		dprintf(1, " ");
+		print_memory(&data->recievedBytesArray[28 + 2] , 2, 16);
+		print_memory(&data->recievedBytesArray[28 + 4] , 2, 16);
+		dprintf(1, "  %hhd ", flag);
+		dprintf(1, " %04hx ", data->recievedBytesArray[28 + 7]);
+		dprintf(1, " %02hhd ", data->recievedBytesArray[28 + 8]);
+		dprintf(1, " %02hhd ", data->recievedBytesArray[28 + 9]);
+		dprintf(1, " %04hx", ntohs(*((short *)&data->recievedBytesArray[28 + 10])));
+		ip.s_addr = *((int *)&data->recievedBytesArray[28+12]);
+		inet_ntop(AF_INET, &ip, srcAddr, INET_ADDRSTRLEN);
+		dprintf(1, "\t%s\t", srcAddr);
+		ip.s_addr = *((int *)&data->recievedBytesArray[28+16]);
+		inet_ntop(AF_INET, &ip, dstAddr, INET_ADDRSTRLEN);
+		dprintf(1, "%s\n", dstAddr);
+		dprintf(1, "ICMP: type %hhd, code %hhu, size %hu, id 0x%hx, seq 0x%04hx", data->recievedBytesArray[28+20],
+		  data->recievedBytesArray[28+21], sizeof(struct icmphdr) + ICMP_PAYLOAD_SIZE , getpid(), stats.pingNb - 1);
+	}
 	free(ipReverseDNS);
-
+	free(ip);
 }
 
 void print_output_loop(t_pingData *data) {
@@ -78,18 +101,12 @@ void print_output_loop(t_pingData *data) {
 	char *ip = outControlIp(data->strIp, data->isDomain);
 
 
-	int id = data->rpacket->icmpHeader.un.echo.id;
-	if (data->options & 1) {
-		dprintf(1, "64 bytes from %s %s: icmp_seq=%d ident=%d ttl=%d time=%.*lf ms\n", data->reverseDns, ip, stats.pingNb, id,ttl, precision, data->time);
-	} else {
-		dprintf(1, "64 bytes from %s %s: icmp_seq=%d ttl=%d time=%.*lf ms\n", data->reverseDns, ip, stats.pingNb, ttl, precision, data->time);
-	}
+	// if (data->options & 1) {
+	dprintf(1, "64 bytes from %s %s: icmp_seq=%d ttl=%d time=%.*lf ms\n", data->reverseDns, ip, stats.pingNb, ttl, precision, data->time);
 	// } else {
-	// 	char *ipReverseDNS = get_ip_reverseDNS(data);
- // 		char *reverseDNS = (data->reverseDns != NULL) ? data->reverseDns : ipReverseDNS;
-	// 	dprintf(1, "From %s (%s): icmp_seq=%d %s", reverseDNS, ipReverseDNS, stats.pingNb, data->error);
-	// 	free(ipReverseDNS);
+	// 	dprintf(1, "64 bytes from %s %s: icmp_seq=%d ttl=%d time=%.*lf ms\n", data->reverseDns, ip, stats.pingNb, ttl, precision, data->time);
 	// }
+
 	free(ip);
 }
 

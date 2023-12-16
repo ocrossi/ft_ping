@@ -17,6 +17,8 @@ static char		**test_word(char **ret, int tst)
 {
 	if (tst == 1)
 	{
+		free(ret[0]);
+		free(ret[1]);
 		ret[0] = NULL;
 		ret[1] = NULL;
 		return (ret);

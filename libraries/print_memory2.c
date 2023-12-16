@@ -53,12 +53,10 @@ void	print_memory_hexa(const void *addr, size_t size)
 	p = (unsigned char *)addr;
 	while (i < (int)size)
 	{
-		if (i % 16 == 0 && i != 0)
-			write(1, "\n", 1);
-		else
-			print_octet_hex(p);
-		write(1, " ", 1);
+		print_octet_hex(p);
 		p++;
 		i++;
+		if (i % 2 == 0)
+			write(1, " ", 1);
 	}
 }

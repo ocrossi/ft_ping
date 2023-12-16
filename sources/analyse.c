@@ -1,4 +1,5 @@
 #include "../includes/ft_ping.h"
+#include <netinet/ip.h>
 
 void manage_time(t_pingData *data) {
 	double fMilli = convert_to_milliseconds(data->recieveTime, data->sendTime);
@@ -13,6 +14,20 @@ void manage_time(t_pingData *data) {
 	stats.max = (stats.max > fMilli) ? stats.max : fMilli;
 	stats.min = (stats.min < fMilli) ? stats.min : fMilli;
 	stats.median_arr[index_median_arr] = fMilli;
+}
+
+void check_icmp_fragment(t_pingData *data, int code) {
+	for (int i = 0; i < 4; i++) {
+		if (data->recievedBytesArray[24 + i] != 0) {
+			if (code == 11 || code == 13) {
+				data->retPrintSize = sizeof(struct iphdr) * 3 + ICMP_PAYLOAD_SIZE;
+			} else if (code == 3) {
+				data->retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct iphdr);
+			}
+			return;
+		}
+	}
+	data->retPrintSize = ICMP_PAYLOAD_SIZE - sizeof(struct iphdr);
 }
 
 bool check_packet_data(t_pingData *data) {
@@ -58,6 +73,7 @@ bool check_packet_data(t_pingData *data) {
 			default:
 				data->error = UNKNOWN_ERR_CODE;
 		}
+		check_icmp_fragment(data, coderouge);
 		stats.nbErrs++;
 		return false;
 	}

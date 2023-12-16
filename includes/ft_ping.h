@@ -24,6 +24,7 @@
 #include "../libraries/libft.h"
 #define MAX_INT 2147483647
 #define PACKET_SIZE 84
+#define RET_PACKET_SIZE 999
 #define MAX_ARR_MEDIAN 10000
 #define ICMP_PAYLOAD_SIZE 56
 #define MAX_PACKET_SIZE 255
@@ -45,6 +46,7 @@
 #define	UNKNOWN_ERR_CODE		"Unknown error code\n" 
 
 typedef struct timeval		t_val;
+typedef struct iphdr		t_ipHdr;
 
 typedef struct		s_packetData {
 	struct iphdr	ipHeader;						//size 20
@@ -59,6 +61,7 @@ typedef struct 	s_pingData {
 	char					*reverseDns;
 	t_packetData			*spacket;
 	t_packetData			*rpacket;
+	char					*recievedBytesArray;
 	int						max_ping;
 	int						ttl;
 	useconds_t				interval;
@@ -68,6 +71,7 @@ typedef struct 	s_pingData {
 	double					time;
 	char					*error;
 	bool					isDomain;
+	int						retPrintSize;
 }							t_pingData;
 
 

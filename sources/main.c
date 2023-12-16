@@ -1,6 +1,7 @@
 #include "../includes/ft_ping.h"
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/ip_icmp.h>
 #include <signal.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -46,6 +47,7 @@ int main(int ac, char** av) {
 			print_output_loop_error(&data);
 		} else {
 			stats.recieved++;
+			data.retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct icmphdr);
 		}
 		if (data.isDomain == true) reverseDNS(&data);
 		else data.reverseDns = ft_strdup(stats.nameDestination); 
@@ -59,6 +61,10 @@ int main(int ac, char** av) {
 		if (data.rpacket != NULL) {
 			free(data.rpacket);
 			data.rpacket = NULL;
+		}
+		if (data.recievedBytesArray != NULL) {
+			free(data.recievedBytesArray);
+			data.recievedBytesArray = NULL;
 		}
 		if (data.max_ping != 0 && stats.pingNb == data.max_ping) {
 			print_stats(0);
