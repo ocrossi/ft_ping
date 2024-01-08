@@ -48,7 +48,7 @@ void construct_headers(t_packetData *packet, t_pingData *data) {
 void construct_packet(t_pingData *data) {
 	t_packetData *packet = (t_packetData *)malloc(sizeof(t_packetData));
 
-	strcpy(packet->payload, "patato|potato");
+	strcpy(packet->payload, "1234");
 	construct_headers(packet, data);
 	data->spacket = packet;
 }
@@ -125,6 +125,6 @@ bool recieve_packet(t_pingData *data, int sockFd) {
 	data->recievedBytesArray = (char *)malloc(bytesRecieved);
 	ft_memcpy(data->recievedBytesArray, recieve, bytesRecieved);
 	gettimeofday(&data->recieveTime, NULL);
-  data->retPrintSize = bytesRecieved;
+	data->retPrintSize = bytesRecieved;
 	return true;
 }

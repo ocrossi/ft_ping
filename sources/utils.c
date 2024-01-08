@@ -94,5 +94,6 @@ char *get_ip_reverseDNS(t_pingData *data) {
 		h = (struct sockaddr_in *)res->ai_addr;
 		inet_ntop(AF_INET, &h->sin_addr, buff, INET_ADDRSTRLEN);
 	}
+	// dprintf(1, "in getipreversedns res is %s\n", buff);
 	return ft_strdup(buff);
 } 

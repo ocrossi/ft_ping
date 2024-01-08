@@ -57,21 +57,21 @@ typedef struct		s_packetData {
 typedef struct 	s_pingData {
   char					options; // bits are 1 if acceptedFlag[bit_pos] est dans input
   char					*strIp;
-  struct sockaddr_in		*networkIp;
+  struct sockaddr_in			*networkIp;
   char					*reverseDns;
-  t_packetData			*spacket;
-  t_packetData			*rpacket;
+  t_packetData				*spacket;
+  t_packetData				*rpacket;
   char					*recievedBytesArray;
-  int						max_ping;
-  int						ttl;
+  int					max_ping;
+  int					ttl;
   useconds_t				interval;
   t_val					sendTime;
   t_val					recieveTime;
   t_val					start_time;
-  double					time;
+  double				time;
   char					*error;
   bool					isDomain;
-  int						retPrintSize;
+  int					retPrintSize;
 }							t_pingData;
 
 
@@ -94,7 +94,7 @@ typedef struct 	s_statData {
 
 
 
-extern char						acceptedFlags[];
+extern char					acceptedFlags[];
 extern t_statData				stats;
 
 void			parsing(int ac, char **args, t_pingData *data);

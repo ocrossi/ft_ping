@@ -58,9 +58,17 @@ void print_flood_protection() {
 }
 
 void print_output_loop_error(t_pingData *data) {
+	reverseDNS(data);
 	char *ip = outControlIp(data->strIp, data->isDomain);
-	char *ipReverseDNS = get_ip_reverseDNS(data);
-	char *reverseDNS = (data->reverseDns != NULL) ? data->reverseDns : ipReverseDNS;
+	char *reverseDNS = (data->reverseDns != NULL) ? data->reverseDns : get_ip_reverseDNS(data);
+	if (data->reverseDns != NULL && data->rpacket->icmpHeader.type == 11) {
+		dprintf(1, "do we get error bytes here?\n");
+	}
+	// dprintf(1, "wait what? in print output loop error fimme strings\n");
+	// dprintf(1, "ip = %s\n", ip);
+	// dprintf(1, "ipReverseDNS %s\n", ipReverseDNS);
+	// dprintf(1, "reverseDNS %s\n", reverseDNS);
+	// dprintf(1, "wait what? in print output loop error fimme strings\n");
 	dprintf(1, "%d bytes from %s %s: icmp_seq=%d %s", data->retPrintSize, reverseDNS, ip, stats.pingNb, data->error);
 	if (data->options & 1) {
 		struct iphdr *ret = (t_ipHdr *)&data->recievedBytesArray[28];
@@ -90,7 +98,6 @@ void print_output_loop_error(t_pingData *data) {
 		dprintf(1, "ICMP: type %hhd, code %hhu, size %hu, id 0x%hx, seq 0x%04hx", data->recievedBytesArray[28+20],
 		  data->recievedBytesArray[28+21], sizeof(struct icmphdr) + ICMP_PAYLOAD_SIZE , getpid(), stats.pingNb - 1);
 	}
-	free(ipReverseDNS);
 	free(ip);
 }
 
@@ -117,7 +124,7 @@ void print_stats(int signum) {
 	double stddev = find_stddev();
 	double time = convert_to_milliseconds(stats.data->recieveTime, stats.data->start_time); 
 
-	printf("\n--- %s ping statistics ---\n", stats.nameDestination);
+	printf("--- %s ping statistics ---\n", stats.nameDestination);
 	if (stats.nbErrs == 0) {
 		printf("%d packets transmitted, %d received, %.*lf%% packet loss\n", stats.transmitted, stats.recieved, loss_precision,loss);
 	} else {

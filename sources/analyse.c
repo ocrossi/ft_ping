@@ -16,30 +16,37 @@ void manage_time(t_pingData *data) {
 	stats.median_arr[index_median_arr] = fMilli;
 }
 
-void check_icmp_fragment(t_pingData *data, int code) {
-	// for (int i = 0; i < 4; i++) {
-	// 	if (data->recievedBytesArray[24 + i] != 0) {
-	// 		if (code == 11 || code == 13) {
-	// 			data->retPrintSize = sizeof(struct iphdr) * 3 + ICMP_PAYLOAD_SIZE;
-	// 		} else if (code == 3) {
-	// 			data->retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct iphdr);
-	// 		}
-	// 		return;
-	// 	}
-	// }
-	// data->retPrintSize = ICMP_PAYLOAD_SIZE - sizeof(struct iphdr);
-	data->retPrintSize -= sizeof(struct iphdr);
-}
+// void check_icmp_fragment(t_pingData *data, int code) {
+// 	int err = data->rpacket->icmpHeader.code;
+//
+// 	printf("code d erreur? %d\n", err);
+//
+// 	for (int i = 0; i < 4; i++) {
+// 		if (data->recievedBytesArray[24 + i] != 0) {
+// 			dprintf(1, "code %d\n", code);
+// 			if (code == 11 || code == 13) {
+// 				data->retPrintSize = sizeof(struct iphdr) * 3 + ICMP_PAYLOAD_SIZE;
+// 				dprintf(1, "ALLOO1\n");
+// 			} else if (code == 3) {
+// 				dprintf(1, "ALLOO2\n");
+// 				data->retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct iphdr);
+// 			}
+// 			return;
+// 		}
+// 	}
+// 	dprintf(1, "FRAG\n");
+// }
 
 bool check_packet_data(t_pingData *data) {
-	int coderouge = data->rpacket->icmpHeader.type; //  cette ligne
+	int type = data->rpacket->icmpHeader.type; //  cette ligne
 
-	if (coderouge == 0 || coderouge == 8) {
+	if (type == 0 || type == 8) {
 		return true;
 	} else {
-		switch (coderouge) {
+		switch (type) {
 			case 3:
 				data->error = EICMP_DEST_UNREACH;
+				data->retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct iphdr);
 				break;
 			case 4:
 				data->error = EICMP_SOURCE_QUENCH;
@@ -49,6 +56,7 @@ bool check_packet_data(t_pingData *data) {
 				break;
 			case 11:
 				data->error = EICMP_TIME_EXCEEDED;
+				data->retPrintSize = sizeof(struct iphdr) * 3 + ICMP_PAYLOAD_SIZE;
 				break;
 			case 12:
 				data->error = EICMP_PARAMETERPROB;
@@ -74,7 +82,12 @@ bool check_packet_data(t_pingData *data) {
 			default:
 				data->error = UNKNOWN_ERR_CODE;
 		}
-		check_icmp_fragment(data, coderouge);
+		printf("error type : %d\n", type);
+		printf("error : %s\n", data->error);
+		// // if (type != 11) {
+		data->retPrintSize -= sizeof(struct ip);
+		// }
+		// check_icmp_fragment(data, type);
 		stats.nbErrs++;
 		return false;
 	}

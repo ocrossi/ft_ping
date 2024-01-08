@@ -3,7 +3,9 @@ https://www.binarytides.com/socket-programming-c-linux-tutorial/
 genial pour comprendre la base d une comm en c client/server tcp
 
 https://datatracker.ietf.org/doc/html/rfc791
-ip protocol doc, search for "3.1.  Internet Header Format"
+ip protocol doc, search for "3.1.  Internet Header Format
+https://datatracker.ietf.org/doc/html/rfc792
+icmp proto doc
 
 # Desole, petites differences au niveau timeout (qui n'est pas set a 1sec par defaut comme dans inetutils-2)
 # Le crash lors du timeout et reponse vide.
@@ -29,5 +31,3 @@ smart move to put init & free function just above main for an in out clearly vis
 
 ## parsing
 good parsing using binary op, just add switch case for flags would be clearer, and without usual breaks
-
-

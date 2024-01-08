@@ -10,6 +10,25 @@
 char acceptedFlags[] = "v?ctiq";
 t_statData stats;
 
+void free_loop(t_pingData *data) {
+	if (data->reverseDns != NULL) {
+		free(data->reverseDns);
+		data->reverseDns = NULL;
+	}
+	if (data->rpacket != NULL) {
+		free(data->rpacket);
+		data->rpacket = NULL;
+	}
+	if (data->recievedBytesArray != NULL) {
+		free(data->recievedBytesArray);
+		data->recievedBytesArray = NULL;
+	}
+	if (data->max_ping != 0 && stats.pingNb == data->max_ping) {
+		print_stats(0);
+		exit(0);
+	}
+}
+
 int main(int ac, char** av) {
 	t_pingData data;
 	int sockFd;
@@ -46,6 +65,7 @@ int main(int ac, char** av) {
 		if (recieved && !check_packet_data(&data)) {
 			error = true;
 			print_output_loop_error(&data);
+			free(data.reverseDns);
 		} else {
 			stats.recieved++;
 			data.retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct icmphdr);
@@ -55,22 +75,7 @@ int main(int ac, char** av) {
 		if (!(data.options & 32) && !error && recieved) { // if quiet is not activated
 			print_output_loop(&data);
 		}
-		if (data.reverseDns != NULL) {
-			free(data.reverseDns);
-			data.reverseDns = NULL;
-		}
-		if (data.rpacket != NULL) {
-			free(data.rpacket);
-			data.rpacket = NULL;
-		}
-		if (data.recievedBytesArray != NULL) {
-			free(data.recievedBytesArray);
-			data.recievedBytesArray = NULL;
-		}
-		if (data.max_ping != 0 && stats.pingNb == data.max_ping) {
-			print_stats(0);
-			exit(0);
-		}
+		free_loop(&data);
 		usleep(data.interval);
 	}
 	return 0;
