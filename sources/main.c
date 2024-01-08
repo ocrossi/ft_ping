@@ -20,8 +20,9 @@ int main(int ac, char** av) {
 	ft_memset(&data, 0, sizeof(data));
 	parsing(ac, av, &data);
 	signal(SIGINT, &print_stats);
+	signal(SIGALRM, &print_alarm);
 	sockFd = create_socket(&data);
-	construct_packet(&data);
+	construct_packet(&data);  
 	stats.median_arr = (double *)malloc(sizeof(double) * MAX_ARR_MEDIAN);
 	stats.data = &data;
 	set_median_arr();
@@ -42,7 +43,7 @@ int main(int ac, char** av) {
 			manage_time(&data);
 			recieved = true;
 		}
-		if (!check_packet_data(&data)) {
+		if (recieved && !check_packet_data(&data)) {
 			error = true;
 			print_output_loop_error(&data);
 		} else {
@@ -51,7 +52,7 @@ int main(int ac, char** av) {
 		}
 		if (data.isDomain == true) reverseDNS(&data);
 		else data.reverseDns = ft_strdup(stats.nameDestination); 
-		if (!(data.options & 32) && !error) { // if quiet is not activated
+		if (!(data.options & 32) && !error && recieved) { // if quiet is not activated
 			print_output_loop(&data);
 		}
 		if (data.reverseDns != NULL) {

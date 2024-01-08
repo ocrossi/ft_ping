@@ -17,21 +17,22 @@ void manage_time(t_pingData *data) {
 }
 
 void check_icmp_fragment(t_pingData *data, int code) {
-	for (int i = 0; i < 4; i++) {
-		if (data->recievedBytesArray[24 + i] != 0) {
-			if (code == 11 || code == 13) {
-				data->retPrintSize = sizeof(struct iphdr) * 3 + ICMP_PAYLOAD_SIZE;
-			} else if (code == 3) {
-				data->retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct iphdr);
-			}
-			return;
-		}
-	}
-	data->retPrintSize = ICMP_PAYLOAD_SIZE - sizeof(struct iphdr);
+	// for (int i = 0; i < 4; i++) {
+	// 	if (data->recievedBytesArray[24 + i] != 0) {
+	// 		if (code == 11 || code == 13) {
+	// 			data->retPrintSize = sizeof(struct iphdr) * 3 + ICMP_PAYLOAD_SIZE;
+	// 		} else if (code == 3) {
+	// 			data->retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct iphdr);
+	// 		}
+	// 		return;
+	// 	}
+	// }
+	// data->retPrintSize = ICMP_PAYLOAD_SIZE - sizeof(struct iphdr);
+	data->retPrintSize -= sizeof(struct iphdr);
 }
 
 bool check_packet_data(t_pingData *data) {
-	int coderouge = data->rpacket->icmpHeader.type;
+	int coderouge = data->rpacket->icmpHeader.type; //  cette ligne
 
 	if (coderouge == 0 || coderouge == 8) {
 		return true;

@@ -49,47 +49,47 @@ typedef struct timeval		t_val;
 typedef struct iphdr		t_ipHdr;
 
 typedef struct		s_packetData {
-	struct iphdr	ipHeader;						//size 20
-	struct icmphdr	icmpHeader;						// size 8
-	char			payload[ICMP_PAYLOAD_SIZE];
+  struct iphdr	ipHeader;						//size 20
+  struct icmphdr	icmpHeader;						// size 8
+  char			payload[ICMP_PAYLOAD_SIZE];
 }					t_packetData;						// total is 84
 
 typedef struct 	s_pingData {
-	char					options; // bits are 1 if acceptedFlag[bit_pos] est dans input
-	char					*strIp;
-	struct sockaddr_in		*networkIp;
-	char					*reverseDns;
-	t_packetData			*spacket;
-	t_packetData			*rpacket;
-	char					*recievedBytesArray;
-	int						max_ping;
-	int						ttl;
-	useconds_t				interval;
-	t_val					sendTime;
-	t_val					recieveTime;
-	t_val					start_time;
-	double					time;
-	char					*error;
-	bool					isDomain;
-	int						retPrintSize;
+  char					options; // bits are 1 if acceptedFlag[bit_pos] est dans input
+  char					*strIp;
+  struct sockaddr_in		*networkIp;
+  char					*reverseDns;
+  t_packetData			*spacket;
+  t_packetData			*rpacket;
+  char					*recievedBytesArray;
+  int						max_ping;
+  int						ttl;
+  useconds_t				interval;
+  t_val					sendTime;
+  t_val					recieveTime;
+  t_val					start_time;
+  double					time;
+  char					*error;
+  bool					isDomain;
+  int						retPrintSize;
 }							t_pingData;
 
 
 typedef struct 	s_statData {
-	t_pingData				*data;
-	char					*nameDestination;
-	int						transmitted;
-	int						recieved;
-	int						lost;
-	int						pingNb;
-	double					time;
-	double					min;
-	double					average;
-	double					median;
-	double					max;
-	double					mdev;
-	int						nbErrs;
-	double					*median_arr;
+  t_pingData				*data;
+  char					*nameDestination;
+  int						transmitted;
+  int						recieved;
+  int						lost;
+  int						pingNb;
+  double					time;
+  double					min;
+  double					average;
+  double					median;
+  double					max;
+  double					mdev;
+  int						nbErrs;
+  double					*median_arr;
 }							t_statData;
 
 
@@ -106,6 +106,7 @@ void			print_output_loop(t_pingData *data);
 void			print_output_loop_error(t_pingData *data);
 void			print_usage(char invalidFlag);
 void			print_stats(int signum);
+void			print_alarm(int signum);
 void			print_head(t_pingData *data);
 void			print_flood_protection(void);
 void			reverseDNS(t_pingData *data);

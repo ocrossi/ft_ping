@@ -125,5 +125,6 @@ bool recieve_packet(t_pingData *data, int sockFd) {
 	data->recievedBytesArray = (char *)malloc(bytesRecieved);
 	ft_memcpy(data->recievedBytesArray, recieve, bytesRecieved);
 	gettimeofday(&data->recieveTime, NULL);
+  data->retPrintSize = bytesRecieved;
 	return true;
 }

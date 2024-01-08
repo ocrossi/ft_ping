@@ -61,7 +61,7 @@ void print_output_loop_error(t_pingData *data) {
 	char *ip = outControlIp(data->strIp, data->isDomain);
 	char *ipReverseDNS = get_ip_reverseDNS(data);
 	char *reverseDNS = (data->reverseDns != NULL) ? data->reverseDns : ipReverseDNS;
-	dprintf(1, "%d from %s %s: icmp_seq=%d %s", data->retPrintSize, reverseDNS, ip, stats.pingNb, data->error);
+	dprintf(1, "%d bytes from %s %s: icmp_seq=%d %s", data->retPrintSize, reverseDNS, ip, stats.pingNb, data->error);
 	if (data->options & 1) {
 		struct iphdr *ret = (t_ipHdr *)&data->recievedBytesArray[28];
 		char flag = data->recievedBytesArray[28 + 6] >> 5;
@@ -131,6 +131,12 @@ void print_stats(int signum) {
 	free(stats.data->networkIp);
 
 	exit(1);
+}
+
+void print_alarm(int signal) {
+  (void)signal;
+
+  fprintf(stderr, "alarm signal spotted\n");
 }
 
 void print_head(t_pingData *data) {
