@@ -59,7 +59,7 @@ int create_socket(t_pingData *data) {
 
 	struct timeval tval;
 	ft_memset(&tval, 0, sizeof(tval));
-	tval.tv_sec = 1;
+	tval.tv_sec = 10;
 	tval.tv_usec = 0;
 
 	sockFd = socket(AF_INET, SOCK_RAW, protocol);
@@ -118,13 +118,11 @@ bool recieve_packet(t_pingData *data, int sockFd) {
 		// 	}
 		// }
 	}
-	// data->rpacket = (t_packetData *)malloc(sizeof(t_packetData));
-	//
 	data->rpacket = (t_packetData *)malloc(bytesRecieved);
 	ft_memcpy(data->rpacket, recieve, bytesRecieved);
 	data->recievedBytesArray = (char *)malloc(bytesRecieved);
 	ft_memcpy(data->recievedBytesArray, recieve, bytesRecieved);
 	gettimeofday(&data->recieveTime, NULL);
   data->retPrintSize = bytesRecieved;
-	return true;
+  return true;
 }

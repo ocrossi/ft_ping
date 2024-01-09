@@ -17,17 +17,10 @@ void manage_time(t_pingData *data) {
 }
 
 void check_icmp_fragment(t_pingData *data, int code) {
-	// for (int i = 0; i < 4; i++) {
-	// 	if (data->recievedBytesArray[24 + i] != 0) {
-	// 		if (code == 11 || code == 13) {
-	// 			data->retPrintSize = sizeof(struct iphdr) * 3 + ICMP_PAYLOAD_SIZE;
-	// 		} else if (code == 3) {
-	// 			data->retPrintSize = ICMP_PAYLOAD_SIZE + sizeof(struct iphdr);
-	// 		}
-	// 		return;
-	// 	}
-	// }
-	// data->retPrintSize = ICMP_PAYLOAD_SIZE - sizeof(struct iphdr);
+  if (data->retPrintSize > 112) { //???
+    // dprintf(1, "multi part extension!!!\n");
+	  data->retPrintSize -= 32;
+  }
 	data->retPrintSize -= sizeof(struct iphdr);
 }
 

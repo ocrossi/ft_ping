@@ -87,7 +87,7 @@ void print_output_loop_error(t_pingData *data) {
 		ip.s_addr = *((int *)&data->recievedBytesArray[28+16]);
 		inet_ntop(AF_INET, &ip, dstAddr, INET_ADDRSTRLEN);
 		dprintf(1, "%s\n", dstAddr);
-		dprintf(1, "ICMP: type %hhd, code %hhu, size %hu, id 0x%hx, seq 0x%04hx", data->recievedBytesArray[28+20],
+		dprintf(1, "ICMP: type %hhd, code %hhu, size %lu, id 0x%hx, seq 0x%04hx", data->recievedBytesArray[28+20],
 		  data->recievedBytesArray[28+21], sizeof(struct icmphdr) + ICMP_PAYLOAD_SIZE , getpid(), stats.pingNb - 1);
 	}
 	free(ipReverseDNS);
@@ -117,7 +117,7 @@ void print_stats(int signum) {
 	double stddev = find_stddev();
 	double time = convert_to_milliseconds(stats.data->recieveTime, stats.data->start_time); 
 
-	printf("\n--- %s ping statistics ---\n", stats.nameDestination);
+	printf("--- %s ping statistics ---\n", stats.nameDestination);
 	if (stats.nbErrs == 0) {
 		printf("%d packets transmitted, %d received, %.*lf%% packet loss\n", stats.transmitted, stats.recieved, loss_precision,loss);
 	} else {

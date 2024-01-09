@@ -30,4 +30,6 @@ smart move to put init & free function just above main for an in out clearly vis
 ## parsing
 good parsing using binary op, just add switch case for flags would be clearer, and without usual breaks
 
-
+## problems
+cant get the good bytes for 11 ttl exceeded right
+timeout when dest unreach not good, mine stops at 1 sec

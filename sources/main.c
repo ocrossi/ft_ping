@@ -38,11 +38,13 @@ int main(int ac, char** av) {
 		recieved = false;
 		error = false;
 		stats.pingNb++;
+    stats.nbErrs++;
 		send_packet(&data, sockFd);
 		if (recieve_packet(&data, sockFd)) {
 			manage_time(&data);
 			recieved = true;
-		}
+		  stats.nbErrs--;
+    }
 		if (recieved && !check_packet_data(&data)) {
 			error = true;
 			print_output_loop_error(&data);
