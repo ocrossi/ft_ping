@@ -1,11 +1,4 @@
 #include "../includes/ft_ping.h"
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 int isNum(char *arg) {
 	for (int i = 0; i < ft_strlen(arg); i++) {
@@ -130,6 +123,7 @@ int manage_options(int ac, char **args, t_pingData *data) {
 			}
 			double res = check_number_next_arg_float(args[i], args[i + 1]);
 			data->interval = convert_to_microseconds(res);
+			data->intervalStr = args[i + 1];
 			if (data->interval <= 0 || data->interval >= MAX_INT) {
 				printf("ping: invalid argument: '%u': out of range: 0 < value <= %d\n", 
 							data->interval, MAX_INT);

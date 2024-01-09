@@ -1,6 +1,4 @@
 #include "../includes/ft_ping.h"
-#include <netinet/ip.h>
-#include <unistd.h>
 
 unsigned short checksum(void *b, int len)
 {
@@ -48,18 +46,18 @@ void construct_headers(t_packetData *packet, t_pingData *data) {
 void construct_packet(t_pingData *data) {
 	t_packetData *packet = (t_packetData *)malloc(sizeof(t_packetData));
 
-	strcpy(packet->payload, "patato|potato");
+	strcpy(packet->payload, "1234");
 	construct_headers(packet, data);
 	data->spacket = packet;
 }
 
-int create_socket(t_pingData *data) {
+int create_socket(void) {
 	int sockFd;
 	int protocol = IPPROTO_ICMP;
 
 	struct timeval tval;
 	ft_memset(&tval, 0, sizeof(tval));
-	tval.tv_sec = 10;
+	tval.tv_sec = 1;
 	tval.tv_usec = 0;
 
 	sockFd = socket(AF_INET, SOCK_RAW, protocol);
@@ -69,7 +67,6 @@ int create_socket(t_pingData *data) {
 		exit(1);
 	}
 	protocol = IPPROTO_IP;
-	int optval = 1;
 	setsockopt(sockFd, protocol, IP_HDRINCL, (int[1]){1}, sizeof(int));
 	setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tval, sizeof(tval));
 
@@ -105,24 +102,13 @@ bool recieve_packet(t_pingData *data, int sockFd) {
 
 	ssize_t bytesRecieved = recvmsg(sockFd, &retMsg, 0);
 	if (bytesRecieved < 0) {
-		// printf("no bytes recieved\n");
 		return false;
-	}
-	else {
-		// printf("bytes recieved %lu\n", bytesRecieved);
-		// print_memory(recieve, bytesRecieved, 16);
-
-		// for (int i = 0; i < bytesRecieved; i++) {
-		// 	if (recieve[i] == 0) {
-		// 		printf("we have a 00 byte at index %d\n", i);
-		// 	}
-		// }
 	}
 	data->rpacket = (t_packetData *)malloc(bytesRecieved);
 	ft_memcpy(data->rpacket, recieve, bytesRecieved);
 	data->recievedBytesArray = (char *)malloc(bytesRecieved);
 	ft_memcpy(data->recievedBytesArray, recieve, bytesRecieved);
 	gettimeofday(&data->recieveTime, NULL);
-  data->retPrintSize = bytesRecieved;
-  return true;
+	data->retPrintSize = bytesRecieved;
+	return true;
 }

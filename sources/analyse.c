@@ -1,5 +1,4 @@
 #include "../includes/ft_ping.h"
-#include <netinet/ip.h>
 
 void manage_time(t_pingData *data) {
 	double fMilli = convert_to_milliseconds(data->recieveTime, data->sendTime);
@@ -16,16 +15,15 @@ void manage_time(t_pingData *data) {
 	stats.median_arr[index_median_arr] = fMilli;
 }
 
-void check_icmp_fragment(t_pingData *data, int code) {
-  if (data->retPrintSize > 112) { //???
-    // dprintf(1, "multi part extension!!!\n");
+void check_icmp_fragment(t_pingData *data) {
+  if (data->retPrintSize > (int)(PACKET_SIZE + sizeof(struct iphdr) + 8)) { //??? the multi part extension... final 8 buytes len of icmp error message
 	  data->retPrintSize -= 32;
   }
 	data->retPrintSize -= sizeof(struct iphdr);
 }
 
 bool check_packet_data(t_pingData *data) {
-	int coderouge = data->rpacket->icmpHeader.type; //  cette ligne
+	int coderouge = data->rpacket->icmpHeader.type;
 
 	if (coderouge == 0 || coderouge == 8) {
 		return true;
@@ -67,7 +65,7 @@ bool check_packet_data(t_pingData *data) {
 			default:
 				data->error = UNKNOWN_ERR_CODE;
 		}
-		check_icmp_fragment(data, coderouge);
+		check_icmp_fragment(data);
 		stats.nbErrs++;
 		return false;
 	}

@@ -49,10 +49,10 @@ typedef struct timeval		t_val;
 typedef struct iphdr		t_ipHdr;
 
 typedef struct		s_packetData {
-  struct iphdr	ipHeader;						//size 20
-  struct icmphdr	icmpHeader;						// size 8
+  struct iphdr	ipHeader;
+  struct icmphdr	icmpHeader;
   char			payload[ICMP_PAYLOAD_SIZE];
-}					t_packetData;						// total is 84
+}					t_packetData;
 
 typedef struct 	s_pingData {
   char					options; // bits are 1 if acceptedFlag[bit_pos] est dans input
@@ -65,6 +65,7 @@ typedef struct 	s_pingData {
   int						max_ping;
   int						ttl;
   useconds_t				interval;
+  char*					intervalStr;
   t_val					sendTime;
   t_val					recieveTime;
   t_val					start_time;
@@ -97,9 +98,12 @@ typedef struct 	s_statData {
 extern char						acceptedFlags[];
 extern t_statData				stats;
 
+/* INIT */ 
 void			parsing(int ac, char **args, t_pingData *data);
-int				create_socket(t_pingData *data);
+int			create_socket(void);
 void			construct_packet(t_pingData *data);
+
+/* OUTPUT */
 void			send_packet(t_pingData *data, int sockFd);
 bool			recieve_packet(t_pingData *data, int sockFd);
 void			print_output_loop(t_pingData *data);
@@ -108,7 +112,9 @@ void			print_usage(char invalidFlag);
 void			print_stats(int signum);
 void			print_alarm(int signum);
 void			print_head(t_pingData *data);
-void			print_flood_protection(void);
+void			print_flood_protection(t_pingData *data);
+
+/* HELPERS */ 
 void			reverseDNS(t_pingData *data);
 void			set_median_arr(void);
 double			find_average(void);
@@ -118,5 +124,6 @@ bool			check_packet_data(t_pingData *data);
 void			manage_time(t_pingData *data);
 char*			get_ip_reverseDNS(t_pingData *data);
 useconds_t		convert_to_microseconds(double seconds);
+int			get_milisec_precision(t_pingData *data);
 
 #endif

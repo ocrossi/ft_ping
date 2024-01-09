@@ -1,5 +1,18 @@
 #include "../includes/ft_ping.h"
-#include <netinet/in.h>
+
+int get_milisec_precision(t_pingData *data) {
+	int digit = 0;
+	double time = data->time;
+
+
+	for(int i = 0; i < 3; i++) {
+		if (time / 10 > 0.1) {
+			digit++;
+			time /= 10;
+		}
+	}
+	return 3 - digit;
+}
 
 double sqrtd(double in) {
 	double groot = in / 3;
