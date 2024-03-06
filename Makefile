@@ -31,6 +31,8 @@ all: libft $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) -L $(LIB_PATH) -I $(INC_PATH) $^ -o $@ $(LIB_PATH)/$(NAME_LIB)
+	@sudo setcap cap_net_raw=pe $(NAME)
+
 
 $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c $(HEADERS)
 	@mkdir $(OBJ_PATH) 2> /dev/null || true

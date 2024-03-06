@@ -51,24 +51,21 @@ void construct_packet(t_pingData *data) {
 
 int create_socket(void) {
   int sockFd;
-  int protocol = IPPROTO_ICMP;
 
   struct timeval tval;
   ft_memset(&tval, 0, sizeof(tval));
   tval.tv_sec = 1;
   tval.tv_usec = 0;
 
-  sockFd = socket(AF_INET, SOCK_RAW, protocol);
+  sockFd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
   // !! needs sudo privileges to create raw socket
   if (sockFd < 0) {
     perror("socket");
     exit(1);
   }
-  protocol = IPPROTO_IP;
-  setsockopt(sockFd, protocol, IP_HDRINCL, (int[1]){1}, sizeof(int));
+  setsockopt(sockFd, IPPROTO_IP, IP_HDRINCL, (int[1]){1}, sizeof(int));
   setsockopt(sockFd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tval,
              sizeof(tval));
-
   return sockFd;
 }
 

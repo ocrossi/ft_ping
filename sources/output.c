@@ -12,7 +12,7 @@ void print_usage(char invalidFlag) {
   dprintf(1,
           "-i <count> %22s wait <count> seconds between sending each packet\n",
           "");
-  dprintf(1, "-? %30s Print usage\n", "");
+  dprintf(1, "'?'%30s Print usage\n", "");
   exit(1);
 }
 
