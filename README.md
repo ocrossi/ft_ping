@@ -15,3 +15,4 @@ seems to work for youtube and google
 https://man7.org/linux/man-pages/man7/signal-safety.7.html
 
 dont print stats in signal handler, just manage a flag to stop flow of exec
+check if PID matches with the sent one for concurrent ping calls
