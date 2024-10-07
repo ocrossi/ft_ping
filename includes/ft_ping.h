@@ -29,7 +29,7 @@
 #define ICMP_PAYLOAD_SIZE 56
 #define MAX_PACKET_SIZE 255
 #define ONE_SEC 1000000
-
+#define OPT_NB 6
 // errors //
 #define EICMP_DEST_UNREACH "Destination Unreachable\n"
 #define EICMP_SOURCE_QUENCH "Source Quench\n"
@@ -55,6 +55,7 @@ typedef struct s_packetData {
 } t_packetData;
 
 typedef struct s_pingData {
+  char acceptedFlags[OPT_NB + 1];
   char options; // bits are 1 if acceptedFlag[bit_pos] est dans input
   char *strIp;
   struct sockaddr_in *networkIp;
@@ -93,7 +94,6 @@ typedef struct s_statData {
   bool alive;
 } t_statData;
 
-extern char acceptedFlags[];
 extern t_statData stats;
 
 /* INIT */

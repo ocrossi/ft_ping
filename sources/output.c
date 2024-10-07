@@ -12,7 +12,7 @@ void print_usage(char invalidFlag) {
   dprintf(1,
           "-i <count> %22s wait <count> seconds between sending each packet\n",
           "");
-  dprintf(1, "'?'%30s Print usage\n", "");
+  dprintf(1, "-? %30s Print usage\n", "");
   exit(1);
 }
 
@@ -71,7 +71,7 @@ void print_output_loop_error(t_pingData *data) {
     dprintf(
         1, "ICMP: type %hhd, code %hhu, size %lu, id 0x%hx, seq 0x%04hx\n",
         data->recievedBytesArray[28 + 20], data->recievedBytesArray[28 + 21],
-        sizeof(struct icmphdr) + ICMP_PAYLOAD_SIZE, getpid(), stats.pingNb - 1);
+        sizeof(struct icmphdr) + ICMP_PAYLOAD_SIZE, getpid(), stats.pingNb);
   }
   free(ipReverseDNS);
   free(ip);
@@ -82,7 +82,7 @@ void print_output_loop(t_pingData *data) {
   int precision = get_milisec_precision(data);
   char *ip = outControlIp(data->strIp, data->isDomain);
 
-  dprintf(1, "64 bytes from %s %s: icmp_seq=%d ttl=%d time=%.*lf ms\n",
+  dprintf(1, "64 bytes from %s %s: icmp_seq=%d ttl=%d time=%.3lf ms\n",
           data->reverseDns, ip, stats.pingNb, ttl, precision, data->time);
   free(ip);
 }
@@ -107,7 +107,7 @@ void print_stats() {
     dprintf(1, "%d packets transmitted, %d received, %.*lf%% packet loss\n",
             stats.transmitted, stats.recieved, loss_precision, loss);
   }
-  if (stats.nbErrs != stats.pingNb)
+  if (stats.nbErrs - 1 != stats.pingNb)
     dprintf(1, "round-trip min/avg/max/stddev = %.3lf/%.3lf/%.3lf/%.3lf ms\n",
             stats.min, stats.average, stats.max, stddev);
   free(stats.median_arr);

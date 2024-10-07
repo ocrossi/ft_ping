@@ -5,7 +5,7 @@ void manage_time(t_pingData *data) {
 	int index_median_arr = (stats.recieved - 1 == -1) ? 0: stats.recieved - 1;
 
 
-	if (stats.pingNb == 1) {
+	if (stats.pingNb == 0) {
 		stats.min =  fMilli;
 	}
 

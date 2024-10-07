@@ -1,14 +1,5 @@
 #include "../includes/ft_ping.h"
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/ip_icmp.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 
-char acceptedFlags[] = "v?ctiq";
 t_statData stats;
 
 void free_loop_data(t_pingData *data) {
@@ -63,7 +54,6 @@ int main(int ac, char **av) {
   }
   while (stats.alive) {
     recieved = false;
-    stats.pingNb++;
     stats.nbErrs++;
     send_packet(&data, sockFd);
     recieved = recieve_packet(&data, sockFd);
@@ -82,11 +72,12 @@ int main(int ac, char **av) {
       } else {
         print_output_loop_error(&data);
       }
-      if (data.max_ping != 0 && stats.pingNb == data.max_ping)
+      if (data.max_ping != 0 && stats.pingNb + 1 == data.max_ping)
         stats.alive = false;
     }
     free_loop_data(&data);
     usleep(data.interval);
+    stats.pingNb++;
   }
   print_stats();
   close(sockFd);

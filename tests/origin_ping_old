@@ -1,4 +1,0 @@
-FROM ubuntu:22.04
-
-RUN apt-get update -yq && apt-get upgrade -yq && \
-	apt-get install inetutils-ping -yq

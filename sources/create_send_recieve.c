@@ -80,6 +80,8 @@ void send_packet(t_pingData *data, int sockFd) {
   } else {
     stats.transmitted++;
   }
+  // printf("id sent from ip header %d\n", data->spacket->ipHeader.id);
+  // printf("id sent from icmp header %d\n", data->spacket->icmpHeader.un.echo.id);
 }
 
 bool recieve_packet(t_pingData *data, int sockFd) {
@@ -107,5 +109,20 @@ bool recieve_packet(t_pingData *data, int sockFd) {
   ft_memcpy(data->recievedBytesArray, recieve, bytesRecieved);
   gettimeofday(&data->recieveTime, NULL);
   data->retPrintSize = bytesRecieved;
+
+  //if (data->rpacket->ipHeader.id != data->rpacket->ipHeader.id)
+  // printf("id recieve from ip header %d\n", data->rpacket->ipHeader.id);
+  // printf("id recieve from icmp header %d\n", data->rpacket->icmpHeader.un.echo.id);
+
+  // edge cases, mutiple ft_pings should get their own sent packets
+  if (data->spacket->icmpHeader.un.echo.id != data->rpacket->icmpHeader.un.echo.id) {
+    printf("mutliple ft_ping instances edge case\n");
+    return false;
+  }
+  // if (data->spacket->ipHeader.id == data->rpacket->ipHeader.id) {
+  //   printf("localhost edge case\n");
+  //   return false;
+  // }
+
   return true;
 }

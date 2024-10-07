@@ -1,5 +1,11 @@
 #include "../includes/ft_ping.h"
 
+void exit_bad_int(t_pingData *data) {
+    fprintf(stderr, "ping: invalid argument: '%d': out of range: 1 <= value <= %d\n",
+               data->max_ping, MAX_INT);
+    exit(1);
+}
+
 int isNum(char *arg) {
   for (int i = 0; i < ft_strlen(arg); i++) {
     if (arg[i] < '0' || arg[i] > '9')
@@ -56,8 +62,8 @@ int check_managed_flags(char *arg, t_pingData *data) {
     if (c == '?') {
       print_usage(0);
     }
-    for (int j = 0; j < ft_strlen(acceptedFlags); j++) {
-      if (c == acceptedFlags[j]) {
+    for (int j = 0; j < OPT_NB; j++) {
+      if (c == data->acceptedFlags[j]) {
         data->options += 1 << j;
         ret = true;
         if (c == 'c' || c == 't' || c == 'i')
@@ -81,9 +87,11 @@ int manage_options(int ac, char **args, t_pingData *data) {
   for (int i = 1; i < ac; i++) {
     isDestination = true;
     if (args[i][0] == '-') {
+      // arg is just -
       if (ft_strlen(args[i]) == 1) {
         print_usage(0);
       }
+      // arg isnt in managed flags list
       if ((indexBadFlag = check_managed_flags(args[i], data)) != 0) {
         print_usage(args[i][indexBadFlag]);
       }
@@ -95,9 +103,7 @@ int manage_options(int ac, char **args, t_pingData *data) {
       }
       data->max_ping = check_number_next_arg_int(args[i], args[i + 1]);
       if (data->max_ping <= 0 || data->max_ping >= MAX_INT) {
-        printf("ping: invalid argument: '%d': out of range: 1 <= value <= %d\n",
-               data->max_ping, MAX_INT);
-        exit(1);
+        exit_bad_int(data);
       }
       data->options ^= 4; // deactivate c to enter only once
       i++;
@@ -109,9 +115,7 @@ int manage_options(int ac, char **args, t_pingData *data) {
       }
       data->ttl = check_number_next_arg_int(args[i], args[i + 1]);
       if (data->ttl <= 0 || data->ttl >= MAXTTL) {
-        printf("ping: invalid argument: '%d': out of range: 1 <= value <= %d\n",
-               data->ttl, MAXTTL);
-        exit(1);
+        exit_bad_int(data);
       }
       data->options ^= 8; // deactivate t to enter only once
       i++;
@@ -198,6 +202,7 @@ void parsing(int ac, char **args, t_pingData *data) {
     fprintf(stderr, "ping: usage error: Destination address required\n");
     exit(0);
   }
+  strcpy(data->acceptedFlags, "v?ctiq");
   index_dest = manage_options(ac, args, data);
   manage_destination(args[index_dest], data);
   stats.nameDestination = args[index_dest];
