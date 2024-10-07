@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  ft_ping:
+    image: my_ping:latest
+    command: tail -f /dev/null
+    networks:
+      - network1
+  ping:
+    image: origin_ping:latest
+    command: tail -f /dev/null
+    networks:
+      - network1
+
+networks:
+  network1:

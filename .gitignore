@@ -1,0 +1,3 @@
+libraries/*.o
+objects
+ft_ping

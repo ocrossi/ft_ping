@@ -1,0 +1,11 @@
+FROM debian:latest
+
+RUN apt-get update -yq && apt-get upgrade -yq && \
+	apt-get install git inetutils-ping make gcc sudo libcap2-bin -yq 
+
+
+RUN git clone https://github.com/ocrossi/ft_ping.git /ft_ping
+
+WORKDIR /ft_ping
+
+RUN make
